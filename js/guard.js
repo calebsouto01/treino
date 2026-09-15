@@ -14,15 +14,20 @@ export function requireRole(expectedRole, onReady) {
     }
 
     const snap = await getDoc(doc(db, "usuarios", user.uid));
-    if (!snap.exists()) {
+    const usuario = snap.exists() ? snap.data() : null;
+
+    // Sem doc de usuário ou com um role que não existe mais (ex: resíduo de
+    // um modelo antigo) não pode virar redirect pra "index.html", porque lá
+    // redirectIfLoggedIn() acharia o mesmo usuário logado e mandaria de volta
+    // pra cá — loop infinito de reload. Nesses casos, desloga e para.
+    if (!usuario || !ROLE_PAGE[usuario.role]) {
       await signOut(auth);
       window.location.href = "index.html";
       return;
     }
 
-    const usuario = snap.data();
     if (usuario.role !== expectedRole) {
-      window.location.href = ROLE_PAGE[usuario.role] || "index.html";
+      window.location.href = ROLE_PAGE[usuario.role];
       return;
     }
 
@@ -35,8 +40,13 @@ export function redirectIfLoggedIn() {
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
     const snap = await getDoc(doc(db, "usuarios", user.uid));
-    if (snap.exists()) {
-      window.location.href = ROLE_PAGE[snap.data().role] || "index.html";
+    const role = snap.exists() ? snap.data().role : null;
+    if (role && ROLE_PAGE[role]) {
+      window.location.href = ROLE_PAGE[role];
+    } else if (snap.exists()) {
+      // Doc existe mas com role inválido/antigo — desloga em vez de ficar
+      // recarregando a própria index.html (loop infinito).
+      await signOut(auth);
     }
   });
 }
