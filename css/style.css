@@ -288,6 +288,11 @@ textarea { padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--
 .filter-row { display: flex; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; }
 .filter-row input, .filter-row select { flex: 1; min-width: 160px; }
 
+.checkbox-group { border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem 1rem; display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; }
+.checkbox-group legend { font-size: 0.82rem; font-weight: 600; color: var(--muted); padding: 0 0.3rem; }
+.checkbox-group label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 400; color: var(--text); }
+.checkbox-group input[type="checkbox"] { width: auto; }
+
 .observacoes-box { background: #fff8e1; border: 1px solid #f0d98c; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.88rem; margin-bottom: 1.2rem; }
 
 .treino-card {

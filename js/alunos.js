@@ -79,6 +79,10 @@ export function initAlunos() {
       diaVencimento: Number(data.get("diaVencimento")) || 10,
       status: data.get("status"),
       dataNascimento: data.get("dataNascimento") || null,
+      objetivo: data.get("objetivo"),
+      nivel: data.get("nivel"),
+      frequenciaSemanal: Number(data.get("frequenciaSemanal")) || 3,
+      restricoes: Array.from(form.querySelectorAll('input[name="restricoes"]:checked')).map((cb) => cb.value),
       observacoes: data.get("observacoes").trim(),
     };
 
@@ -176,6 +180,12 @@ function renderAlunos(alunos, tbody, empty, form, emailInput, senhaInput, hint) 
       form.elements.diaVencimento.value = aluno.diaVencimento || 10;
       form.elements.status.value = aluno.status || "ativo";
       form.elements.dataNascimento.value = aluno.dataNascimento || "";
+      form.elements.objetivo.value = aluno.objetivo || "hipertrofia";
+      form.elements.nivel.value = aluno.nivel || "iniciante";
+      form.elements.frequenciaSemanal.value = aluno.frequenciaSemanal || 3;
+      form.querySelectorAll('input[name="restricoes"]').forEach((cb) => {
+        cb.checked = (aluno.restricoes || []).includes(cb.value);
+      });
       form.elements.observacoes.value = aluno.observacoes || "";
       form.hidden = false;
     });

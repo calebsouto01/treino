@@ -120,7 +120,43 @@
           </label>
           <label>Data de nascimento<input type="date" name="dataNascimento"></label>
         </div>
-        <label>Observações (só o professor vê)<textarea name="observacoes" rows="2" placeholder="Ex: lesão no joelho, prefere treinar de manhã..."></textarea></label>
+        <div class="form-row">
+          <label>Objetivo
+            <select name="objetivo">
+              <option value="hipertrofia">Hipertrofia</option>
+              <option value="emagrecimento">Emagrecimento</option>
+              <option value="condicionamento">Condicionamento físico</option>
+            </select>
+          </label>
+          <label>Nível de experiência
+            <select name="nivel">
+              <option value="iniciante">Iniciante</option>
+              <option value="intermediario">Intermediário</option>
+              <option value="avancado">Avançado</option>
+            </select>
+          </label>
+        </div>
+        <label>Frequência semanal desejada
+          <select name="frequenciaSemanal">
+            <option value="1">1x por semana</option>
+            <option value="2">2x por semana</option>
+            <option value="3" selected>3x por semana</option>
+            <option value="4">4x por semana</option>
+            <option value="5">5x por semana</option>
+            <option value="6">6x por semana</option>
+          </select>
+        </label>
+        <fieldset class="checkbox-group">
+          <legend>Restrições/lesões (usado pra gerar o treino automático sem forçar essas articulações)</legend>
+          <label><input type="checkbox" name="restricoes" value="joelho"> Joelho</label>
+          <label><input type="checkbox" name="restricoes" value="ombro"> Ombro</label>
+          <label><input type="checkbox" name="restricoes" value="lombar"> Lombar</label>
+          <label><input type="checkbox" name="restricoes" value="punho"> Punho</label>
+          <label><input type="checkbox" name="restricoes" value="tornozelo"> Tornozelo</label>
+          <label><input type="checkbox" name="restricoes" value="quadril"> Quadril</label>
+          <label><input type="checkbox" name="restricoes" value="cotovelo"> Cotovelo</label>
+        </fieldset>
+        <label>Observações (só o professor vê)<textarea name="observacoes" rows="2" placeholder="Ex: prefere treinar de manhã..."></textarea></label>
         <p class="form-hint" id="alunoFormHint" hidden>O e-mail e a senha só podem ser definidos na criação do aluno (não é possível alterar depois por aqui).</p>
         <div class="form-actions">
           <button type="button" class="btn btn--ghost" id="cancelarAlunoBtn">Cancelar</button>
@@ -264,6 +300,16 @@
           <label>Repetições<input type="text" name="repeticoes" value="12" required></label>
           <label>Descanso<input type="text" name="descanso" value="60s"></label>
         </div>
+        <fieldset class="checkbox-group">
+          <legend>Articulações envolvidas (usado pra filtrar o treino automático por restrições)</legend>
+          <label><input type="checkbox" name="articulacoes" value="joelho"> Joelho</label>
+          <label><input type="checkbox" name="articulacoes" value="ombro"> Ombro</label>
+          <label><input type="checkbox" name="articulacoes" value="lombar"> Lombar</label>
+          <label><input type="checkbox" name="articulacoes" value="punho"> Punho</label>
+          <label><input type="checkbox" name="articulacoes" value="tornozelo"> Tornozelo</label>
+          <label><input type="checkbox" name="articulacoes" value="quadril"> Quadril</label>
+          <label><input type="checkbox" name="articulacoes" value="cotovelo"> Cotovelo</label>
+        </fieldset>
         <div class="form-actions">
           <button type="button" class="btn btn--ghost" id="cancelarExercicioBtn">Cancelar</button>
           <button type="submit" class="btn btn--primary">Salvar exercício</button>
@@ -322,6 +368,7 @@
         <div class="view__header">
           <h3 style="margin:0">Treinos</h3>
           <div class="form-actions">
+            <button type="button" class="btn btn--ghost" id="gerarTreinoAutoBtn">🤖 Gerar treino automático</button>
             <button type="button" class="btn btn--ghost" id="aplicarPlanoBtn">📋 Aplicar plano da biblioteca</button>
             <button type="button" class="btn btn--primary" id="novoTreinoBtn">+ Novo treino</button>
           </div>

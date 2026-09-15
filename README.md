@@ -28,6 +28,15 @@ avaliação física, execução com feedback obrigatório, evolução).
   Avaliação), **Treinos** (Treinos — lista de planos por grupo muscular,
   Criar planos, Exercícios, Aparelhos), **Pagamentos** (Visão geral) e
   **Check-in** (Registrar).
+
+  No cadastro do aluno, além dos dados básicos, o professor define
+  **objetivo** (hipertrofia/emagrecimento/condicionamento), **nível de
+  experiência**, **frequência semanal** desejada e **restrições/lesões**
+  (por articulação). Com isso, o botão **"🤖 Gerar treino automático"** (na
+  aba Treino do detalhe do aluno) monta sozinho a divisão de treino
+  adequada — reaproveitando a mesma biblioteca de exercícios — e abre pra
+  revisão no formulário de treino já existente antes de salvar. Ver
+  "Geração automática de treino" abaixo.
 - **Aluno**: vê o treino atual, executa e **precisa dar feedback para
   concluir** (mesma lógica do MFIT: se tem feedback, o treino foi feito),
   acompanha histórico, gráfico de evolução de peso e faz seu próprio
@@ -53,7 +62,8 @@ usuarios/{uid} → { nome, email, role: 'professor'|'aluno', professorId }
 professores/{profUid} → { nome, email, criadoEm }   // profUid == uid do professor
   /alunos/{alunoUid} → {
     nome, telefone, email, plano, status, diaVencimento,
-    dataNascimento, observacoes, treinoAtivoId
+    dataNascimento, observacoes, treinoAtivoId,
+    objetivo, nivel, frequenciaSemanal, restricoes: [...]
   }
     /treinos/{treinoId}         → { nome, exercicios:[{nome,series,repeticoes,carga,descanso,videoUrl}], criadoEm }
     /execucoes/{execId}         → { treinoNome, exerciciosFeitos:[...], feedback, nota, data }
@@ -78,6 +88,29 @@ mescla com `js/exercicios-catalogo.js`) usadas tanto no form de treino
 avulso quanto no form de plano — o `aparelho` de cada exercício é um campo
 de texto preenchido a partir da lista de `aparelhos`, sem exigir que o
 exercício aponte pra um documento específico.
+
+### Geração automática de treino
+
+`js/gerador-treino.js` exporta `gerarTreinos(aluno, ultimaAvaliacao, catalogoCompleto)`,
+uma função pura (sem DOM, sem Firestore) que decide:
+
+- **divisão** pela frequência semanal (1-2x → full body; 3x → A/B/C por
+  grupo; 4x → upper/lower; 5-6x → um treino por grupo muscular, usando
+  `GRUPOS_MUSCULARES`);
+- **volume** (séries/repetições/descanso/quantidade de exercícios por
+  grupo) pelo nível de experiência;
+- **ênfase** pelo objetivo (emagrecimento reduz descanso, aumenta
+  repetições e acrescenta um bloco de cardio — mais longo se o IMC da
+  última avaliação for alto; hipertrofia mantém volume padrão);
+- **filtro de restrições**: exclui do pool qualquer exercício cuja(s)
+  `articulacoes` cruze(m) com as restrições do aluno (por isso cada
+  exercício do catálogo fixo e dos próprios do professor tem esse campo).
+
+Não é IA — é um algoritmo determinístico, sem custo por geração, que roda
+inteiramente no navegador. O resultado nunca é aplicado direto: abre no
+mesmo form de "novo treino" que já existe pra revisão, e se gerar mais de
+um treino (ex: divisão A/B/C), o próximo abre automaticamente assim que o
+professor salva o anterior.
 
 `alunos/{alunoUid}.treinoAtivoId` aponta pro treino (dentro de `treinos/`)
 que o aluno está vendo atualmente — o professor pode ter vários treinos
@@ -144,4 +177,7 @@ Firebase Console → Firestore → Rules).
 - Cobrança automática (Pix/cartão) integrada
 - Fotos de progresso (Firebase Storage)
 - Notificações push/e-mail (treino do dia, mensalidade a vencer)
-- Templates de treino reutilizáveis sem precisar de um aluno "de origem"
+- Geração de treino via IA (exigiria Cloud Functions pra não expor chave de
+  API no navegador) como alternativa/complemento ao gerador por regras
+- Progressão automática do treino gerado ao longo do tempo, ajustando
+  carga/reps conforme o histórico de execuções do aluno

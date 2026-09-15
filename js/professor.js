@@ -9,8 +9,10 @@ import {
   updateDoc,
   deleteDoc,
   onSnapshot,
+  getDocs,
   query,
   orderBy,
+  limit,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initAlunos } from "./alunos.js";
@@ -19,7 +21,8 @@ import { initCheckin } from "./checkin.js";
 import { initPlanos, getPlanosCache } from "./planos.js";
 import { initAvaliacao } from "./avaliacao.js";
 import { initAparelhos } from "./aparelhos.js";
-import { initExercicios } from "./exercicios.js";
+import { initExercicios, getCatalogoCompleto } from "./exercicios.js";
+import { gerarTreinos } from "./gerador-treino.js";
 import { criarLinhaExercicio, lerExerciciosDoContainer } from "./exercicio-row.js";
 import { irParaView } from "./nav.js";
 
@@ -113,6 +116,7 @@ function abrirFormTreino(treino = null) {
 
 document.getElementById("novoTreinoBtn").addEventListener("click", () => abrirFormTreino());
 document.getElementById("cancelarTreinoBtn").addEventListener("click", () => {
+  filaRascunhosTreino = [];
   document.getElementById("treinoForm").hidden = true;
 });
 
@@ -147,6 +151,43 @@ document.getElementById("treinoForm").addEventListener("submit", async (e) => {
   }
 
   form.hidden = true;
+
+  // Se veio de uma geração automática com mais de um treino, abre o
+  // próximo rascunho da fila pra revisão em seguida.
+  if (filaRascunhosTreino.length > 0) {
+    abrirFormTreino(filaRascunhosTreino.shift());
+  }
+});
+
+// ---------- Gerar treino automático ----------
+
+let filaRascunhosTreino = [];
+
+document.getElementById("gerarTreinoAutoBtn").addEventListener("click", async () => {
+  if (!alunoAtual) return;
+
+  const avaliacoesSnap = await getDocs(
+    query(collection(alunoRef(alunoAtual.id), "avaliacoes"), orderBy("data", "desc"), limit(1))
+  );
+  const ultimaAvaliacao = avaliacoesSnap.empty ? null : avaliacoesSnap.docs[0].data();
+
+  const dadosAluno = {
+    objetivo: alunoAtual.objetivo || "hipertrofia",
+    nivel: alunoAtual.nivel || "iniciante",
+    frequenciaSemanal: alunoAtual.frequenciaSemanal || 3,
+    restricoes: alunoAtual.restricoes || [],
+  };
+
+  const rascunhos = gerarTreinos(dadosAluno, ultimaAvaliacao, getCatalogoCompleto());
+  if (rascunhos.length === 0) return;
+
+  filaRascunhosTreino = rascunhos.slice(1);
+  abrirFormTreino(rascunhos[0]);
+  if (filaRascunhosTreino.length > 0) {
+    alert(
+      `${rascunhos.length} treinos gerados a partir do objetivo/nível/frequência do aluno. Revise e salve um de cada vez — o próximo abre automaticamente pra revisão.`
+    );
+  }
 });
 
 function renderTreinosList(alunoId) {

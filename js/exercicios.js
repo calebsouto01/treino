@@ -28,7 +28,9 @@ export function getExerciciosCache() {
 }
 
 // Junta o catálogo fixo com os exercícios próprios do professor, pra
-// alimentar os <datalist> de autocomplete do form de treino e de plano.
+// alimentar os <datalist> de autocomplete do form de treino e de plano, e o
+// pool de candidatos do gerador automático de treino (por isso carrega
+// articulacoes também).
 export function getCatalogoCompleto() {
   const customizados = exerciciosCache.map((ex) => ({
     nome: ex.nome,
@@ -36,6 +38,7 @@ export function getCatalogoCompleto() {
     series: ex.series,
     repeticoes: ex.repeticoes,
     descanso: ex.descanso,
+    articulacoes: ex.articulacoes || [],
   }));
   return [...CATALOGO_EXERCICIOS, ...customizados];
 }
@@ -59,6 +62,16 @@ function atualizarDatalists() {
   DATALIST_IDS.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = optionsHtml;
+  });
+}
+
+function lerArticulacoesDoForm(form) {
+  return Array.from(form.querySelectorAll('input[name="articulacoes"]:checked')).map((cb) => cb.value);
+}
+
+function marcarArticulacoesNoForm(form, articulacoes = []) {
+  form.querySelectorAll('input[name="articulacoes"]').forEach((cb) => {
+    cb.checked = articulacoes.includes(cb.value);
   });
 }
 
@@ -102,6 +115,7 @@ export function initExercicios() {
       series: Number(form.elements.series.value) || 1,
       repeticoes: form.elements.repeticoes.value.trim(),
       descanso: form.elements.descanso.value.trim(),
+      articulacoes: lerArticulacoesDoForm(form),
     };
 
     if (exercicioId) {
@@ -147,6 +161,7 @@ function renderExercicios(tbody, empty, form, aparelhoSelect) {
       form.elements.series.value = ex.series ?? 3;
       form.elements.repeticoes.value = ex.repeticoes || "12";
       form.elements.descanso.value = ex.descanso || "60s";
+      marcarArticulacoesNoForm(form, ex.articulacoes || []);
       form.hidden = false;
     });
     tr.querySelector('[data-action="excluir"]').addEventListener("click", async () => {
