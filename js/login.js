@@ -2,18 +2,17 @@ import { auth, db } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   doc,
+  getDoc,
   setDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { redirectIfLoggedIn, ROLE_PAGE } from "./guard.js";
 
-// Se já estiver logado, vai direto pro dashboard
-onAuthStateChanged(auth, (user) => {
-  if (user) window.location.href = "app.html";
-});
+// Se já estiver logado, vai direto pro dashboard certo (admin/professor/aluno)
+redirectIfLoggedIn();
 
 const tabs = document.querySelectorAll(".auth-tab");
 const loginForm = document.getElementById("loginForm");
@@ -48,8 +47,10 @@ loginForm.addEventListener("submit", async (e) => {
   errorEl.hidden = true;
   const data = new FormData(loginForm);
   try {
-    await signInWithEmailAndPassword(auth, data.get("email"), data.get("senha"));
-    window.location.href = "app.html";
+    const cred = await signInWithEmailAndPassword(auth, data.get("email"), data.get("senha"));
+    const usuarioSnap = await getDoc(doc(db, "usuarios", cred.user.uid));
+    const role = usuarioSnap.exists() ? usuarioSnap.data().role : "admin";
+    window.location.href = ROLE_PAGE[role] || "app.html";
   } catch (err) {
     showError(errorEl, err);
   }

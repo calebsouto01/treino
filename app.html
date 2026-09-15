@@ -12,6 +12,7 @@
     <div class="sidebar__brand">🏋️ <span id="nomeAcademia">Academia</span></div>
     <nav class="sidebar__nav">
       <button class="sidebar__link is-active" data-view="alunos">👤 Alunos</button>
+      <button class="sidebar__link" data-view="professores">🧑‍🏫 Professores</button>
       <button class="sidebar__link" data-view="pagamentos">💳 Pagamentos</button>
       <button class="sidebar__link" data-view="checkin">✅ Check-in</button>
     </nav>
@@ -34,12 +35,20 @@
           <label>Telefone<input type="tel" name="telefone" required></label>
         </div>
         <div class="form-row">
-          <label>E-mail<input type="email" name="email"></label>
+          <label>E-mail (login do aluno)<input type="email" name="email" required></label>
+          <label id="alunoSenhaWrap">Senha de acesso<input type="text" name="senha" placeholder="Mínimo 6 caracteres" minlength="6"></label>
+        </div>
+        <div class="form-row">
           <label>Plano
             <select name="plano">
               <option value="mensal">Mensal</option>
               <option value="trimestral">Trimestral</option>
               <option value="anual">Anual</option>
+            </select>
+          </label>
+          <label>Professor
+            <select name="professorId" id="alunoProfessorSelect">
+              <option value="">Sem professor</option>
             </select>
           </label>
         </div>
@@ -53,6 +62,7 @@
             </select>
           </label>
         </div>
+        <p class="form-hint" id="alunoFormHint" hidden>O e-mail e a senha só podem ser definidos na criação do aluno (não é possível alterar depois por aqui).</p>
         <div class="form-actions">
           <button type="button" class="btn btn--ghost" id="cancelarAlunoBtn">Cancelar</button>
           <button type="submit" class="btn btn--primary">Salvar</button>
@@ -61,11 +71,39 @@
 
       <table class="table">
         <thead>
-          <tr><th>Nome</th><th>Telefone</th><th>Plano</th><th>Status</th><th>Vencimento</th><th></th></tr>
+          <tr><th>Nome</th><th>Telefone</th><th>Professor</th><th>Plano</th><th>Status</th><th>Vencimento</th><th></th></tr>
         </thead>
         <tbody id="alunosTbody"></tbody>
       </table>
       <p class="empty-state" id="alunosEmpty" hidden>Nenhum aluno cadastrado ainda.</p>
+    </section>
+
+    <!-- PROFESSORES -->
+    <section class="view" id="view-professores" hidden>
+      <div class="view__header">
+        <h2>Professores</h2>
+        <button class="btn btn--primary" id="novoProfessorBtn">+ Novo professor</button>
+      </div>
+
+      <form id="professorForm" class="card-form" hidden>
+        <div class="form-row">
+          <label>Nome<input type="text" name="nome" required></label>
+          <label>E-mail (login do professor)<input type="email" name="email" required></label>
+        </div>
+        <div class="form-row">
+          <label>Senha de acesso<input type="text" name="senha" required minlength="6" placeholder="Mínimo 6 caracteres"></label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelarProfessorBtn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Criar professor</button>
+        </div>
+      </form>
+
+      <table class="table">
+        <thead><tr><th>Nome</th><th>E-mail</th><th>Alunos</th><th>Status</th><th></th></tr></thead>
+        <tbody id="professoresTbody"></tbody>
+      </table>
+      <p class="empty-state" id="professoresEmpty" hidden>Nenhum professor cadastrado ainda.</p>
     </section>
 
     <!-- PAGAMENTOS -->

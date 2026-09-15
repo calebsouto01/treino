@@ -169,6 +169,47 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1
 .badge--inativo { background: rgba(224,72,62,0.12); color: var(--danger); }
 
 .empty-state { text-align: center; color: var(--muted); padding: 2rem 0; }
+.form-hint { font-size: 0.82rem; color: var(--muted); margin: -0.4rem 0 0; }
+
+.sidebar__label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: #a29dc7; margin: 0 0 0.5rem; }
+
+.tabs { display: flex; gap: 0.4rem; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border); }
+.tab { padding: 0.6rem 1rem; border: none; background: transparent; cursor: pointer; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; }
+.tab.is-active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.exercicio-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: 0.6rem; align-items: end; margin-bottom: 0.8rem; }
+.exercicio-row label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+.exercicio-row .remove-exercicio { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.2rem; padding: 0.4rem; }
+
+textarea { padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); font-family: inherit; font-size: 0.95rem; resize: vertical; }
+
+.aluno-item { display: block; width: 100%; text-align: left; padding: 0.6rem 0.9rem; border-radius: 8px; border: none; background: transparent; color: #cfcbe6; cursor: pointer; margin-bottom: 0.2rem; }
+.aluno-item:hover { background: rgba(255,255,255,0.06); }
+.aluno-item.is-active { background: var(--primary); color: #fff; }
+
+@media (max-width: 720px) {
+  .exercicio-row { grid-template-columns: 1fr 1fr; }
+}
+
+.exercicio-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.exercicio-card__info { flex: 1; min-width: 180px; }
+.exercicio-card__info strong { display: block; margin-bottom: 0.2rem; }
+.exercicio-card__meta { font-size: 0.85rem; color: var(--muted); }
+.exercicio-card input[type="checkbox"] { width: 20px; height: 20px; }
+.exercicio-card.is-done { border-color: var(--success); background: rgba(31,171,95,0.06); }
+
+.chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; }
+.chart-box svg { width: 100%; height: auto; display: block; }
 .section-subtitle { margin: 1.5rem 0 0.8rem; color: var(--muted); font-size: 0.95rem; }
 
 @media (max-width: 720px) {

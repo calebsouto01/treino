@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academia SaaS – Professor</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-body">
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">🧑‍🏫 <span id="nomeProfessor">Professor</span></div>
+    <p class="sidebar__label">Meus alunos</p>
+    <nav class="sidebar__nav" id="alunosList"></nav>
+    <button class="sidebar__logout" id="logoutBtn">Sair</button>
+  </aside>
+
+  <main class="content">
+
+    <p class="empty-state" id="nenhumAlunoSelecionado">Selecione um aluno na lista ao lado para ver treino, avaliações e histórico.</p>
+
+    <div id="alunoDetalhe" hidden>
+      <div class="view__header">
+        <h2 id="alunoNomeTitulo">Aluno</h2>
+      </div>
+
+      <div class="tabs">
+        <button class="tab is-active" data-tab="treino">Treino</button>
+        <button class="tab" data-tab="avaliacao">Avaliação física</button>
+        <button class="tab" data-tab="historico">Histórico</button>
+      </div>
+
+      <!-- TREINO -->
+      <section class="tab-panel" id="panel-treino">
+        <form id="treinoForm" class="card-form">
+          <label>Nome do treino<input type="text" name="nome" placeholder="Ex: Treino A - Superior" required></label>
+
+          <div id="exerciciosList"></div>
+          <button type="button" class="btn btn--ghost" id="addExercicioBtn">+ Adicionar exercício</button>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Salvar treino</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- AVALIAÇÃO FÍSICA -->
+      <section class="tab-panel" id="panel-avaliacao" hidden>
+        <form id="avaliacaoForm" class="card-form">
+          <div class="form-row">
+            <label>Peso (kg)<input type="number" step="0.1" name="peso" required></label>
+            <label>Altura (m)<input type="number" step="0.01" name="altura" required></label>
+          </div>
+          <div class="form-row">
+            <label>Cintura (cm)<input type="number" step="0.1" name="cintura"></label>
+            <label>Quadril (cm)<input type="number" step="0.1" name="quadril"></label>
+          </div>
+          <div class="form-row">
+            <label>Braço (cm)<input type="number" step="0.1" name="braco"></label>
+            <label>Coxa (cm)<input type="number" step="0.1" name="coxa"></label>
+          </div>
+          <label>Observações<textarea name="observacoes" rows="2"></textarea></label>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Registrar avaliação</button>
+          </div>
+        </form>
+
+        <h3 class="section-subtitle">Histórico de avaliações</h3>
+        <table class="table">
+          <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>Cintura</th><th>Quadril</th></tr></thead>
+          <tbody id="avaliacoesTbody"></tbody>
+        </table>
+        <p class="empty-state" id="avaliacoesEmpty" hidden>Nenhuma avaliação registrada ainda.</p>
+      </section>
+
+      <!-- HISTÓRICO DE EXECUÇÕES -->
+      <section class="tab-panel" id="panel-historico" hidden>
+        <table class="table">
+          <thead><tr><th>Data</th><th>Treino</th><th>Nota</th><th>Feedback</th></tr></thead>
+          <tbody id="execucoesTbody"></tbody>
+        </table>
+        <p class="empty-state" id="execucoesEmpty" hidden>Este aluno ainda não concluiu nenhum treino.</p>
+      </section>
+    </div>
+
+  </main>
+
+  <script type="module" src="js/professor.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academia SaaS – Meu Treino</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-body">
+
+  <aside class="sidebar">
+    <div class="sidebar__brand">🏋️ <span id="nomeAluno">Aluno</span></div>
+    <nav class="sidebar__nav">
+      <button class="sidebar__link is-active" data-view="treino">💪 Meu treino</button>
+      <button class="sidebar__link" data-view="historico">📅 Histórico</button>
+      <button class="sidebar__link" data-view="evolucao">📈 Evolução</button>
+      <button class="sidebar__link" data-view="checkin">✅ Check-in</button>
+    </nav>
+    <button class="sidebar__logout" id="logoutBtn">Sair</button>
+  </aside>
+
+  <main class="content">
+
+    <!-- MEU TREINO -->
+    <section class="view" id="view-treino">
+      <div class="view__header">
+        <h2 id="treinoNomeTitulo">Meu treino</h2>
+      </div>
+
+      <p class="empty-state" id="semTreino" hidden>Você ainda não tem um treino cadastrado. Fale com seu professor.</p>
+
+      <div id="exerciciosExecucao"></div>
+
+      <form id="finalizarForm" class="card-form" hidden>
+        <h3 class="section-subtitle" style="margin-top:0">Finalizar treino</h3>
+        <label>Como foi o treino hoje? (obrigatório para concluir)
+          <textarea name="feedback" rows="2" required placeholder="Ex: Consegui completar tudo, senti dificuldade no último exercício..."></textarea>
+        </label>
+        <label>Nota do treino
+          <select name="nota" required>
+            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+            <option value="4">⭐⭐⭐⭐ Bom</option>
+            <option value="3">⭐⭐⭐ Ok</option>
+            <option value="2">⭐⭐ Difícil</option>
+            <option value="1">⭐ Muito difícil</option>
+          </select>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Concluir treino</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- HISTÓRICO -->
+    <section class="view" id="view-historico" hidden>
+      <div class="view__header"><h2>Histórico de treinos</h2></div>
+      <table class="table">
+        <thead><tr><th>Data</th><th>Treino</th><th>Nota</th><th>Feedback</th></tr></thead>
+        <tbody id="historicoTbody"></tbody>
+      </table>
+      <p class="empty-state" id="historicoEmpty" hidden>Você ainda não concluiu nenhum treino.</p>
+    </section>
+
+    <!-- EVOLUÇÃO -->
+    <section class="view" id="view-evolucao" hidden>
+      <div class="view__header"><h2>Evolução</h2></div>
+
+      <form id="pesoForm" class="card-form card-form--inline">
+        <label class="grow">Peso de hoje (kg)<input type="number" step="0.1" name="peso" required></label>
+        <button type="submit" class="btn btn--primary">Registrar</button>
+      </form>
+
+      <div id="graficoEvolucao" class="chart-box"></div>
+      <p class="empty-state" id="evolucaoEmpty" hidden>Registre seu peso para acompanhar sua evolução aqui.</p>
+    </section>
+
+    <!-- CHECK-IN -->
+    <section class="view" id="view-checkin" hidden>
+      <div class="view__header"><h2>Check-in</h2></div>
+      <button class="btn btn--primary" id="checkinBtn">Registrar entrada agora</button>
+      <h3 class="section-subtitle">Seus check-ins recentes</h3>
+      <table class="table">
+        <thead><tr><th>Data</th><th>Horário</th></tr></thead>
+        <tbody id="meusCheckinsTbody"></tbody>
+      </table>
+      <p class="empty-state" id="meusCheckinsEmpty" hidden>Nenhum check-in registrado ainda.</p>
+    </section>
+
+  </main>
+
+  <script type="module" src="js/aluno.js"></script>
+</body>
+</html>
