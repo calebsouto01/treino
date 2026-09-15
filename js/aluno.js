@@ -43,13 +43,16 @@ document.querySelectorAll(".sidebar__link").forEach((link) => {
 let treinoAtual = null;
 
 async function carregarTreino() {
-  const snap = await getDoc(doc(alunoRef(), "treinos", "atual"));
   const semTreino = document.getElementById("semTreino");
   const container = document.getElementById("exerciciosExecucao");
   const finalizarForm = document.getElementById("finalizarForm");
   container.innerHTML = "";
 
-  if (!snap.exists() || !(snap.data().exercicios || []).length) {
+  const alunoSnap = await getDoc(alunoRef());
+  const treinoAtivoId = alunoSnap.exists() ? alunoSnap.data().treinoAtivoId : null;
+  const snap = treinoAtivoId ? await getDoc(doc(alunoRef(), "treinos", treinoAtivoId)) : null;
+
+  if (!snap || !snap.exists() || !(snap.data().exercicios || []).length) {
     semTreino.hidden = false;
     finalizarForm.hidden = true;
     document.getElementById("treinoNomeTitulo").textContent = "Meu treino";
@@ -70,6 +73,7 @@ async function carregarTreino() {
       <div class="exercicio-card__info">
         <strong>${escapeHtml(ex.nome)}</strong>
         <span class="exercicio-card__meta">${ex.series}x${escapeHtml(ex.repeticoes)} · carga sugerida: ${escapeHtml(ex.carga || "-")} · descanso: ${escapeHtml(ex.descanso || "-")}</span>
+        ${ex.videoUrl ? `<a href="${escapeHtml(ex.videoUrl)}" target="_blank" rel="noopener" class="video-link">▶ Ver execução</a>` : ""}
       </div>
       <label>Carga usada<input type="text" class="carga-usada" placeholder="${escapeHtml(ex.carga || "kg")}"></label>
     `;

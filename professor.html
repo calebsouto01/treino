@@ -11,7 +11,8 @@
   <aside class="sidebar">
     <div class="sidebar__brand">🧑‍🏫 <span id="nomeProfessor">Professor</span></div>
     <nav class="sidebar__nav">
-      <button class="sidebar__link is-active" data-view="alunos">👤 Alunos</button>
+      <button class="sidebar__link is-active" data-view="inicio">🏠 Início</button>
+      <button class="sidebar__link" data-view="alunos">👤 Alunos</button>
       <button class="sidebar__link" data-view="pagamentos">💳 Pagamentos</button>
       <button class="sidebar__link" data-view="checkin">✅ Check-in</button>
     </nav>
@@ -20,11 +21,52 @@
 
   <main class="content">
 
+    <!-- INÍCIO (DASHBOARD) -->
+    <section class="view" id="view-inicio">
+      <div class="view__header">
+        <h2>Início</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-card__value" id="statAtivos">-</span>
+          <span class="stat-card__label">Alunos ativos</span>
+        </div>
+        <div class="stat-card stat-card--warning">
+          <span class="stat-card__value" id="statInadimplentes">-</span>
+          <span class="stat-card__label">Inadimplentes</span>
+        </div>
+        <div class="stat-card stat-card--danger">
+          <span class="stat-card__value" id="statSumidos">-</span>
+          <span class="stat-card__label">Sem treinar há +7 dias</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__value" id="statVencendo">-</span>
+          <span class="stat-card__label">Vencendo esta semana</span>
+        </div>
+      </div>
+
+      <div id="aniversariantesBox" hidden>
+        <h3 class="section-subtitle">🎂 Aniversariantes do mês</h3>
+        <ul class="simple-list" id="aniversariantesLista"></ul>
+      </div>
+    </section>
+
     <!-- ALUNOS (lista) -->
-    <section class="view" id="view-alunos">
+    <section class="view" id="view-alunos" hidden>
       <div class="view__header">
         <h2>Alunos</h2>
         <button class="btn btn--primary" id="novoAlunoBtn">+ Novo aluno</button>
+      </div>
+
+      <div class="filter-row">
+        <input type="search" id="alunoBusca" placeholder="Buscar por nome...">
+        <select id="alunoFiltroStatus">
+          <option value="">Todos os status</option>
+          <option value="ativo">Ativo</option>
+          <option value="inadimplente">Inadimplente</option>
+          <option value="inativo">Inativo</option>
+        </select>
       </div>
 
       <form id="alunoForm" class="card-form" hidden>
@@ -55,7 +97,9 @@
               <option value="inativo">Inativo</option>
             </select>
           </label>
+          <label>Data de nascimento<input type="date" name="dataNascimento"></label>
         </div>
+        <label>Observações (só o professor vê)<textarea name="observacoes" rows="2" placeholder="Ex: lesão no joelho, prefere treinar de manhã..."></textarea></label>
         <p class="form-hint" id="alunoFormHint" hidden>O e-mail e a senha só podem ser definidos na criação do aluno (não é possível alterar depois por aqui).</p>
         <div class="form-actions">
           <button type="button" class="btn btn--ghost" id="cancelarAlunoBtn">Cancelar</button>
@@ -80,6 +124,8 @@
         <h2 id="alunoNomeTitulo">Aluno</h2>
       </div>
 
+      <p class="observacoes-box" id="alunoObservacoesBox" hidden><strong>Observações:</strong> <span id="alunoObservacoesTexto"></span></p>
+
       <div class="tabs">
         <button class="tab is-active" data-tab="treino">Treino</button>
         <button class="tab" data-tab="avaliacao">Avaliação física</button>
@@ -88,13 +134,33 @@
 
       <!-- TREINO -->
       <section class="tab-panel" id="panel-treino">
-        <form id="treinoForm" class="card-form">
+        <div class="view__header">
+          <h3 style="margin:0">Treinos</h3>
+          <button type="button" class="btn btn--primary" id="novoTreinoBtn">+ Novo treino</button>
+        </div>
+
+        <div id="treinosLista"></div>
+        <p class="empty-state" id="treinosEmpty" hidden>Nenhum treino cadastrado ainda.</p>
+
+        <div class="card-form" id="copiarTreinoBox" hidden>
+          <label>Copiar este treino para qual aluno?
+            <select id="copiarTreinoSelect"></select>
+          </label>
+          <div class="form-actions">
+            <button type="button" class="btn btn--ghost" id="cancelarCopiaBtn">Cancelar</button>
+            <button type="button" class="btn btn--primary" id="confirmarCopiaBtn">Copiar treino</button>
+          </div>
+        </div>
+
+        <form id="treinoForm" class="card-form" hidden>
+          <input type="hidden" name="treinoId">
           <label>Nome do treino<input type="text" name="nome" placeholder="Ex: Treino A - Superior" required></label>
 
           <div id="exerciciosList"></div>
           <button type="button" class="btn btn--ghost" id="addExercicioBtn">+ Adicionar exercício</button>
 
           <div class="form-actions">
+            <button type="button" class="btn btn--ghost" id="cancelarTreinoBtn">Cancelar</button>
             <button type="submit" class="btn btn--primary">Salvar treino</button>
           </div>
         </form>
@@ -144,6 +210,19 @@
       <div class="view__header">
         <h2>Pagamentos</h2>
       </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-card__value" id="statRecebidoMes">-</span>
+          <span class="stat-card__label">Recebido este mês</span>
+        </div>
+        <div class="stat-card stat-card--warning">
+          <span class="stat-card__value" id="statInadimplentesFin">-</span>
+          <span class="stat-card__label">Alunos inadimplentes</span>
+        </div>
+      </div>
+
+      <div id="inadimplentesLista"></div>
 
       <form id="pagamentoForm" class="card-form">
         <div class="form-row">

@@ -32,6 +32,25 @@ export function initAlunos() {
   const hint = document.getElementById("alunoFormHint");
   const emailInput = form.elements.email;
   const senhaInput = form.elements.senha;
+  const buscaInput = document.getElementById("alunoBusca");
+  const filtroStatus = document.getElementById("alunoFiltroStatus");
+
+  function alunosFiltrados() {
+    const termo = buscaInput.value.trim().toLowerCase();
+    const status = filtroStatus.value;
+    return state.alunosCache.filter((a) => {
+      const bateNome = !termo || a.nome.toLowerCase().includes(termo);
+      const bateStatus = !status || a.status === status;
+      return bateNome && bateStatus;
+    });
+  }
+
+  function rerenderComFiltro() {
+    renderAlunos(alunosFiltrados(), tbody, empty, form, emailInput, senhaInput, hint);
+  }
+
+  buscaInput.addEventListener("input", rerenderComFiltro);
+  filtroStatus.addEventListener("change", rerenderComFiltro);
 
   novoBtn.addEventListener("click", () => {
     form.reset();
@@ -59,6 +78,8 @@ export function initAlunos() {
       plano: data.get("plano"),
       diaVencimento: Number(data.get("diaVencimento")) || 10,
       status: data.get("status"),
+      dataNascimento: data.get("dataNascimento") || null,
+      observacoes: data.get("observacoes").trim(),
     };
 
     if (alunoId) {
@@ -95,7 +116,7 @@ export function initAlunos() {
 
   onSnapshot(query(alunosCol(), orderBy("nome")), (snap) => {
     state.alunosCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    renderAlunos(state.alunosCache, tbody, empty, form, emailInput, senhaInput, hint);
+    rerenderComFiltro();
     notifyAlunosUpdated();
   });
 }
@@ -154,6 +175,8 @@ function renderAlunos(alunos, tbody, empty, form, emailInput, senhaInput, hint) 
       form.elements.plano.value = aluno.plano || "mensal";
       form.elements.diaVencimento.value = aluno.diaVencimento || 10;
       form.elements.status.value = aluno.status || "ativo";
+      form.elements.dataNascimento.value = aluno.dataNascimento || "";
+      form.elements.observacoes.value = aluno.observacoes || "";
       form.hidden = false;
     });
   });

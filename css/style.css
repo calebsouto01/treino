@@ -244,6 +244,53 @@ textarea { padding: 0.7rem 0.85rem; border-radius: 8px; border: 1px solid var(--
 .chart-box svg { width: 100%; height: auto; display: block; }
 .section-subtitle { margin: 1.5rem 0 0.8rem; color: var(--muted); font-size: 0.95rem; }
 
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.stat-card--warning { border-left-color: var(--warning); }
+.stat-card--danger { border-left-color: var(--danger); }
+.stat-card__value { font-size: 1.8rem; font-weight: 800; }
+.stat-card__label { font-size: 0.82rem; color: var(--muted); }
+
+.simple-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.simple-list li { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.9rem; }
+
+.filter-row { display: flex; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.filter-row input, .filter-row select { flex: 1; min-width: 160px; }
+
+.observacoes-box { background: #fff8e1; border: 1px solid #f0d98c; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.88rem; margin-bottom: 1.2rem; }
+
+.treino-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.treino-card.is-ativo { border-color: var(--success); background: rgba(31,171,95,0.05); }
+.treino-card__info { flex: 1; min-width: 160px; }
+.treino-card__info strong { display: block; }
+.treino-card__meta { font-size: 0.82rem; color: var(--muted); }
+.treino-card__actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+.whatsapp-link { color: var(--success); font-weight: 600; text-decoration: none; font-size: 0.85rem; }
+.whatsapp-link:hover { text-decoration: underline; }
+
+.video-link { display: inline-block; margin-top: 0.3rem; color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.82rem; }
+.video-link:hover { text-decoration: underline; }
+
 @media (max-width: 720px) {
   .app-body { flex-direction: column; }
   .sidebar { width: 100%; flex-direction: row; align-items: center; }

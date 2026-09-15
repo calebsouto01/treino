@@ -28,6 +28,32 @@ function populateAlunoSelect(select) {
   if (selecionado) select.value = selecionado;
 }
 
+function renderInadimplentes() {
+  const inadimplentes = state.alunosCache.filter((a) => a.status === "inadimplente");
+  document.getElementById("statInadimplentesFin").textContent = inadimplentes.length;
+
+  const container = document.getElementById("inadimplentesLista");
+  if (inadimplentes.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML =
+    '<h3 class="section-subtitle">Alunos inadimplentes</h3>' +
+    '<ul class="simple-list">' +
+    inadimplentes
+      .map((a) => {
+        const telefone = (a.telefone || "").replace(/\D/g, "");
+        const texto = encodeURIComponent(`Olá ${a.nome}! Tudo bem? Passando pra lembrar que sua mensalidade está em aberto. Pode verificar pra mim?`);
+        const link = telefone
+          ? `<a class="whatsapp-link" target="_blank" rel="noopener" href="https://wa.me/55${telefone}?text=${texto}">Cobrar via WhatsApp</a>`
+          : "";
+        return `<li>${escapeHtml(a.nome)} ${link}</li>`;
+      })
+      .join("") +
+    "</ul>";
+}
+
 export function initPagamentos() {
   const form = document.getElementById("pagamentoForm");
   const alunoSelect = document.getElementById("pagamentoAlunoSelect");
@@ -35,7 +61,11 @@ export function initPagamentos() {
   const empty = document.getElementById("pagamentosEmpty");
 
   populateAlunoSelect(alunoSelect);
-  document.addEventListener("alunos-updated", () => populateAlunoSelect(alunoSelect));
+  renderInadimplentes();
+  document.addEventListener("alunos-updated", () => {
+    populateAlunoSelect(alunoSelect);
+    renderInadimplentes();
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -65,7 +95,20 @@ export function initPagamentos() {
   onSnapshot(query(pagamentosCol(), orderBy("registradoEm", "desc")), (snap) => {
     const pagamentos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderPagamentos(pagamentos, tbody, empty);
+    renderRecebidoMes(pagamentos);
   });
+}
+
+function renderRecebidoMes(pagamentos) {
+  const agora = new Date();
+  const total = pagamentos
+    .filter((p) => {
+      const d = p.registradoEm?.toDate ? p.registradoEm.toDate() : null;
+      return d && d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear();
+    })
+    .reduce((soma, p) => soma + (Number(p.valor) || 0), 0);
+
+  document.getElementById("statRecebidoMes").textContent = "R$ " + total.toFixed(2).replace(".", ",");
 }
 
 function renderPagamentos(pagamentos, tbody, empty) {

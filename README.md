@@ -6,10 +6,15 @@ avaliação física, execução com feedback obrigatório, evolução).
 
 ## Papéis
 
-- **Professor**: cadastra seus alunos (com login próprio), prescreve treino
-  (exercícios com séries/repetições/carga/descanso), registra avaliação
-  física (peso, altura, IMC, medidas), controla mensalidades e check-in, e
-  acompanha o histórico de execuções/feedback de cada aluno.
+- **Professor**: painel Início com resumo (ativos, inadimplentes, sumidos há
+  +7 dias, mensalidades vencendo, aniversariantes); cadastra seus alunos (com
+  login próprio, busca/filtro por status e observações privadas); prescreve
+  **múltiplos treinos por aluno** com histórico (não sobrescreve o anterior),
+  pode marcar qual está ativo e **copiar um treino para outro aluno**;
+  registra avaliação física (peso, altura, IMC, medidas); controla
+  mensalidades (com resumo de recebido no mês e cobrança rápida via
+  WhatsApp) e check-in; acompanha o histórico de execuções/feedback de cada
+  aluno.
 - **Aluno**: vê o treino atual, executa e **precisa dar feedback para
   concluir** (mesma lógica do MFIT: se tem feedback, o treino foi feito),
   acompanha histórico, gráfico de evolução de peso e faz seu próprio
@@ -33,14 +38,22 @@ usuarios/{uid} → { nome, email, role: 'professor'|'aluno', professorId }
   // para aluno: professorId == uid do professor que o criou
 
 professores/{profUid} → { nome, email, criadoEm }   // profUid == uid do professor
-  /alunos/{alunoUid} → { nome, telefone, email, plano, status, diaVencimento }
-    /treinos/atual              → { nome, exercicios:[{nome,series,repeticoes,carga,descanso}] }
+  /alunos/{alunoUid} → {
+    nome, telefone, email, plano, status, diaVencimento,
+    dataNascimento, observacoes, treinoAtivoId
+  }
+    /treinos/{treinoId}         → { nome, exercicios:[{nome,series,repeticoes,carga,descanso,videoUrl}], criadoEm }
     /execucoes/{execId}         → { treinoNome, exerciciosFeitos:[...], feedback, nota, data }
     /avaliacoes/{avalId}        → { peso, altura, cintura, quadril, braco, coxa, observacoes, data }
     /evolucao/{evoId}           → { peso, data }
   /pagamentos/{pagamentoId}     → { alunoId, alunoNome, valor, mesReferencia, forma, registradoEm }
   /checkins/{checkinId}         → { alunoId, alunoNome, dataHora }
 ```
+
+`alunos/{alunoUid}.treinoAtivoId` aponta pro treino (dentro de `treinos/`)
+que o aluno está vendo atualmente — o professor pode ter vários treinos
+cadastrados (histórico) e trocar qual está ativo a qualquer momento, ou
+copiar um treino pronto de um aluno pra outro.
 
 `alunos/{alunoUid}` é criado com o **próprio uid da conta Firebase Auth do
 aluno** (não um ID aleatório) — isso é o que permite as regras de segurança
@@ -63,12 +76,15 @@ de Cloud Functions/Admin SDK.
 
 ## Simplificações conscientes em relação ao MFIT
 
-- Sem biblioteca de vídeos de exercícios (só texto/observações no exercício)
+- Sem biblioteca própria de vídeos (o professor cola um link externo por
+  exercício, ex: YouTube)
 - Sem gateway de pagamento integrado (Pix/boleto/cartão automático) — os
   pagamentos continuam sendo registrados manualmente pelo professor
 - Um único protocolo de avaliação física (peso/altura/IMC/medidas), em vez
   dos 11 protocolos de dobras cutâneas do MFIT
-- Um treino "atual" por aluno (não há histórico de várias rotinas paralelas)
+- "Vencendo esta semana" e "aniversariantes do mês" no dashboard são
+  calculados no navegador a partir do dia/data cadastrado — não há
+  notificação push nem e-mail automático ainda
 - Excluir um aluno remove o registro no Firestore, mas não a conta no
   Firebase Authentication (precisaria do Admin SDK/Cloud Functions)
 
@@ -95,8 +111,8 @@ Firebase Console → Firestore → Rules).
 
 ## Próximos passos sugeridos
 
-- Vídeos/links de exercícios na prescrição de treino
 - Múltiplos protocolos de avaliação física (dobras cutâneas)
 - Cobrança automática (Pix/cartão) integrada
 - Fotos de progresso (Firebase Storage)
-- Notificações (treino do dia, mensalidade a vencer)
+- Notificações push/e-mail (treino do dia, mensalidade a vencer)
+- Templates de treino reutilizáveis sem precisar de um aluno "de origem"
