@@ -16,7 +16,11 @@ import {
 import { initAlunos } from "./alunos.js";
 import { initPagamentos } from "./pagamentos.js";
 import { initCheckin } from "./checkin.js";
-import { CATALOGO_EXERCICIOS, buscarExercicioPorNome } from "./exercicios-catalogo.js";
+import { initPlanos, getPlanosCache } from "./planos.js";
+import { initAvaliacao } from "./avaliacao.js";
+import { CATALOGO_EXERCICIOS } from "./exercicios-catalogo.js";
+import { criarLinhaExercicio, lerExerciciosDoContainer } from "./exercicio-row.js";
+import { irParaView } from "./nav.js";
 
 document.getElementById("catalogoExercicios").innerHTML = CATALOGO_EXERCICIOS.map(
   (ex) => `<option value="${ex.nome}">${ex.grupo}</option>`
@@ -36,16 +40,10 @@ function alunoRef(alunoId) {
 
 // ---------- Navegação principal ----------
 
-const views = document.querySelectorAll(".view");
-const navLinks = document.querySelectorAll(".sidebar__link");
+const navLinks = document.querySelectorAll(".sidebar__link, .sidebar__sublink");
 
 navLinks.forEach((link) => {
-  link.addEventListener("click", () => {
-    navLinks.forEach((l) => l.classList.remove("is-active"));
-    link.classList.add("is-active");
-    const target = link.dataset.view;
-    views.forEach((v) => (v.hidden = v.id !== `view-${target}`));
-  });
+  link.addEventListener("click", () => irParaView(link.dataset.view));
 });
 
 // ---------- Ir para o detalhe de um aluno ----------
@@ -54,14 +52,12 @@ let alunoAtual = null;
 let treinosCache = [];
 let unsubTreinos = null;
 let unsubAlunoDoc = null;
-let unsubAvaliacoes = null;
 let unsubExecucoes = null;
 
 document.addEventListener("aluno-selecionado", (e) => {
   alunoAtual = e.detail;
 
-  navLinks.forEach((l) => l.classList.remove("is-active"));
-  views.forEach((v) => (v.hidden = v.id !== "view-aluno-detalhe"));
+  irParaView("aluno-detalhe");
   document.getElementById("alunoNomeTitulo").textContent = alunoAtual.nome;
 
   const obsBox = document.getElementById("alunoObservacoesBox");
@@ -74,16 +70,13 @@ document.addEventListener("aluno-selecionado", (e) => {
 
   document.getElementById("treinoForm").hidden = true;
   document.getElementById("copiarTreinoBox").hidden = true;
+  document.getElementById("aplicarPlanoBox").hidden = true;
 
   carregarTreinos(alunoAtual.id);
-  carregarAvaliacoes(alunoAtual.id);
   carregarExecucoes(alunoAtual.id);
 });
 
-document.getElementById("voltarAlunosBtn").addEventListener("click", () => {
-  views.forEach((v) => (v.hidden = v.id !== "view-alunos"));
-  navLinks.forEach((l) => l.classList.toggle("is-active", l.dataset.view === "alunos"));
-});
+document.getElementById("voltarAlunosBtn").addEventListener("click", () => irParaView("alunos"));
 
 // ---------- Tabs do detalhe ----------
 
@@ -97,33 +90,10 @@ document.querySelectorAll(".tab").forEach((tab) => {
 
 // ---------- Treinos (múltiplos, com histórico e cópia) ----------
 
-function linhaExercicio(ex = {}) {
-  const row = document.createElement("div");
-  row.className = "exercicio-row";
-  row.innerHTML = `
-    <label>Exercício<input type="text" data-field="nome" list="catalogoExercicios" placeholder="Digite ou escolha da lista" value="${escapeHtml(ex.nome || "")}" required></label>
-    <label>Séries<input type="number" min="1" data-field="series" value="${ex.series ?? 3}" required></label>
-    <label>Repetições<input type="text" data-field="repeticoes" value="${escapeHtml(ex.repeticoes || "12")}" required></label>
-    <label>Carga<input type="text" data-field="carga" value="${escapeHtml(ex.carga || "")}" placeholder="Ex: 20kg"></label>
-    <label>Descanso<input type="text" data-field="descanso" value="${escapeHtml(ex.descanso || "60s")}"></label>
-    <label>Vídeo (opcional)<input type="url" data-field="videoUrl" value="${escapeHtml(ex.videoUrl || "")}" placeholder="https://..."></label>
-    <button type="button" class="remove-exercicio" title="Remover">✕</button>
-  `;
-  row.querySelector(".remove-exercicio").addEventListener("click", () => row.remove());
-
-  row.querySelector('[data-field="nome"]').addEventListener("change", (e) => {
-    const doCatalogo = buscarExercicioPorNome(e.target.value);
-    if (!doCatalogo) return;
-    row.querySelector('[data-field="series"]').value = doCatalogo.series;
-    row.querySelector('[data-field="repeticoes"]').value = doCatalogo.repeticoes;
-    row.querySelector('[data-field="descanso"]').value = doCatalogo.descanso;
-  });
-
-  return row;
-}
+const CATALOGO_TREINO_DATALIST = "catalogoExercicios";
 
 document.getElementById("addExercicioBtn").addEventListener("click", () => {
-  document.getElementById("exerciciosList").appendChild(linhaExercicio());
+  document.getElementById("exerciciosList").appendChild(criarLinhaExercicio(CATALOGO_TREINO_DATALIST));
 });
 
 function abrirFormTreino(treino = null) {
@@ -134,12 +104,13 @@ function abrirFormTreino(treino = null) {
   treinoForm.elements.treinoId.value = treino ? treino.id : "";
   if (treino) {
     treinoForm.elements.nome.value = treino.nome || "";
-    (treino.exercicios || []).forEach((ex) => exerciciosList.appendChild(linhaExercicio(ex)));
+    (treino.exercicios || []).forEach((ex) => exerciciosList.appendChild(criarLinhaExercicio(CATALOGO_TREINO_DATALIST, ex)));
   }
   if (exerciciosList.children.length === 0) {
-    exerciciosList.appendChild(linhaExercicio());
+    exerciciosList.appendChild(criarLinhaExercicio(CATALOGO_TREINO_DATALIST));
   }
   document.getElementById("copiarTreinoBox").hidden = true;
+  document.getElementById("aplicarPlanoBox").hidden = true;
   treinoForm.hidden = false;
 }
 
@@ -154,14 +125,7 @@ document.getElementById("treinoForm").addEventListener("submit", async (e) => {
 
   const form = e.target;
   const treinoId = form.elements.treinoId.value;
-  const exercicios = Array.from(document.querySelectorAll("#exerciciosList .exercicio-row")).map((row) => ({
-    nome: row.querySelector('[data-field="nome"]').value.trim(),
-    series: Number(row.querySelector('[data-field="series"]').value) || 1,
-    repeticoes: row.querySelector('[data-field="repeticoes"]').value.trim(),
-    carga: row.querySelector('[data-field="carga"]').value.trim(),
-    descanso: row.querySelector('[data-field="descanso"]').value.trim(),
-    videoUrl: row.querySelector('[data-field="videoUrl"]').value.trim(),
-  }));
+  const exercicios = lerExerciciosDoContainer(document.getElementById("exerciciosList"));
 
   const treinosCol = collection(alunoRef(alunoAtual.id), "treinos");
 
@@ -261,6 +225,7 @@ function abrirCopiarTreino(treino) {
     .map((a) => `<option value="${a.id}">${escapeHtml(a.nome)}</option>`)
     .join("");
   document.getElementById("treinoForm").hidden = true;
+  document.getElementById("aplicarPlanoBox").hidden = true;
   document.getElementById("copiarTreinoBox").hidden = false;
 }
 
@@ -285,58 +250,43 @@ document.getElementById("confirmarCopiaBtn").addEventListener("click", async () 
   alert("Treino copiado!");
 });
 
-// ---------- Avaliação física ----------
+// ---------- Aplicar plano da biblioteca ----------
 
-function calcularImc(peso, altura) {
-  if (!peso || !altura) return "-";
-  return (peso / (altura * altura)).toFixed(1);
-}
+document.getElementById("aplicarPlanoBtn").addEventListener("click", () => {
+  const planos = getPlanosCache();
+  const select = document.getElementById("aplicarPlanoSelect");
+  select.innerHTML = planos
+    .map((p) => `<option value="${p.id}">${escapeHtml(p.nome)} (${escapeHtml(p.grupoMuscular || "")})</option>`)
+    .join("");
+  document.getElementById("treinoForm").hidden = true;
+  document.getElementById("copiarTreinoBox").hidden = true;
+  document.getElementById("aplicarPlanoBox").hidden = false;
+});
 
-function carregarAvaliacoes(alunoId) {
-  if (unsubAvaliacoes) unsubAvaliacoes();
-  const tbody = document.getElementById("avaliacoesTbody");
-  const empty = document.getElementById("avaliacoesEmpty");
+document.getElementById("cancelarAplicarPlanoBtn").addEventListener("click", () => {
+  document.getElementById("aplicarPlanoBox").hidden = true;
+});
 
-  const q = query(collection(alunoRef(alunoId), "avaliacoes"), orderBy("data", "desc"));
-  unsubAvaliacoes = onSnapshot(q, (snap) => {
-    const avaliacoes = snap.docs.map((d) => d.data());
-    tbody.innerHTML = "";
-    empty.hidden = avaliacoes.length > 0;
+document.getElementById("confirmarAplicarPlanoBtn").addEventListener("click", async () => {
+  const planoId = document.getElementById("aplicarPlanoSelect").value;
+  if (!planoId || !alunoAtual) return;
+  const plano = getPlanosCache().find((p) => p.id === planoId);
+  if (!plano) return;
 
-    avaliacoes.forEach((a) => {
-      const data = a.data?.toDate ? a.data.toDate().toLocaleDateString("pt-BR") : "-";
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${data}</td>
-        <td>${a.peso ?? "-"} kg</td>
-        <td>${calcularImc(a.peso, a.altura)}</td>
-        <td>${a.cintura ?? "-"}</td>
-        <td>${a.quadril ?? "-"}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  });
-}
-
-document.getElementById("avaliacaoForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!alunoAtual) return;
-
-  const form = e.target;
-  const data = new FormData(form);
-
-  await addDoc(collection(alunoRef(alunoAtual.id), "avaliacoes"), {
-    peso: Number(data.get("peso")),
-    altura: Number(data.get("altura")),
-    cintura: data.get("cintura") ? Number(data.get("cintura")) : null,
-    quadril: data.get("quadril") ? Number(data.get("quadril")) : null,
-    braco: data.get("braco") ? Number(data.get("braco")) : null,
-    coxa: data.get("coxa") ? Number(data.get("coxa")) : null,
-    observacoes: data.get("observacoes").trim(),
-    data: serverTimestamp(),
+  const novoRef = await addDoc(collection(alunoRef(alunoAtual.id), "treinos"), {
+    nome: plano.nome,
+    exercicios: plano.exercicios || [],
+    criadoEm: serverTimestamp(),
+    atualizadoEm: serverTimestamp(),
   });
 
-  form.reset();
+  if (!alunoAtual.treinoAtivoId) {
+    await updateDoc(alunoRef(alunoAtual.id), { treinoAtivoId: novoRef.id });
+    alunoAtual.treinoAtivoId = novoRef.id;
+  }
+
+  document.getElementById("aplicarPlanoBox").hidden = true;
+  alert("Plano aplicado!");
 });
 
 // ---------- Histórico de execuções ----------
@@ -450,5 +400,7 @@ requireRole("professor", (usuario) => {
   initAlunos();
   initPagamentos();
   initCheckin();
+  initPlanos();
+  initAvaliacao();
   carregarDashboard();
 });

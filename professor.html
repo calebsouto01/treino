@@ -12,9 +12,28 @@
     <div class="sidebar__brand">🧑‍🏫 <span id="nomeProfessor">Professor</span></div>
     <nav class="sidebar__nav">
       <button class="sidebar__link is-active" data-view="inicio">🏠 Início</button>
-      <button class="sidebar__link" data-view="alunos">👤 Alunos</button>
-      <button class="sidebar__link" data-view="pagamentos">💳 Pagamentos</button>
-      <button class="sidebar__link" data-view="checkin">✅ Check-in</button>
+
+      <div class="sidebar__group">
+        <div class="sidebar__group-title">👤 Alunos</div>
+        <button class="sidebar__sublink" data-view="alunos">Cadastrar</button>
+        <button class="sidebar__sublink" data-view="avaliacao">Avaliação</button>
+      </div>
+
+      <div class="sidebar__group">
+        <div class="sidebar__group-title">🏋️ Treinos</div>
+        <button class="sidebar__sublink" data-view="treinos">Treinos</button>
+        <button class="sidebar__sublink" data-view="criar-plano">Criar planos</button>
+      </div>
+
+      <div class="sidebar__group">
+        <div class="sidebar__group-title">💳 Pagamentos</div>
+        <button class="sidebar__sublink" data-view="pagamentos">Visão geral</button>
+      </div>
+
+      <div class="sidebar__group">
+        <div class="sidebar__group-title">✅ Check-in</div>
+        <button class="sidebar__sublink" data-view="checkin">Registrar</button>
+      </div>
     </nav>
     <button class="sidebar__logout" id="logoutBtn">Sair</button>
   </aside>
@@ -116,6 +135,97 @@
       <p class="empty-state" id="alunosEmpty" hidden>Nenhum aluno cadastrado ainda.</p>
     </section>
 
+    <!-- ALUNOS > AVALIAÇÃO -->
+    <section class="view" id="view-avaliacao" hidden>
+      <div class="view__header">
+        <h2>Avaliação física</h2>
+      </div>
+
+      <div class="filter-row">
+        <select id="avaliacaoAlunoSelect">
+          <option value="">Selecione um aluno...</option>
+        </select>
+      </div>
+
+      <p class="empty-state" id="avaliacaoSemAluno">Selecione um aluno acima pra ver ou registrar uma avaliação física.</p>
+
+      <div id="avaliacaoConteudo" hidden>
+        <form id="avaliacaoForm" class="card-form">
+          <div class="form-row">
+            <label>Peso (kg)<input type="number" step="0.1" name="peso" required></label>
+            <label>Altura (m)<input type="number" step="0.01" name="altura" required></label>
+          </div>
+          <div class="form-row">
+            <label>Cintura (cm)<input type="number" step="0.1" name="cintura"></label>
+            <label>Quadril (cm)<input type="number" step="0.1" name="quadril"></label>
+          </div>
+          <div class="form-row">
+            <label>Braço (cm)<input type="number" step="0.1" name="braco"></label>
+            <label>Coxa (cm)<input type="number" step="0.1" name="coxa"></label>
+          </div>
+          <label>Observações<textarea name="observacoes" rows="2"></textarea></label>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Registrar avaliação</button>
+          </div>
+        </form>
+
+        <h3 class="section-subtitle">Histórico de avaliações</h3>
+        <table class="table">
+          <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>Cintura</th><th>Quadril</th></tr></thead>
+          <tbody id="avaliacoesTbody"></tbody>
+        </table>
+        <p class="empty-state" id="avaliacoesEmpty" hidden>Nenhuma avaliação registrada ainda.</p>
+      </div>
+    </section>
+
+    <!-- TREINOS > TREINOS (biblioteca de planos, agrupada por grupo muscular) -->
+    <section class="view" id="view-treinos" hidden>
+      <div class="view__header">
+        <h2>Treinos</h2>
+        <button type="button" class="btn btn--primary" id="novoPlanoBtn">+ Novo plano</button>
+      </div>
+
+      <div id="planosPorGrupo"></div>
+      <p class="empty-state" id="planosEmpty" hidden>Nenhum plano cadastrado ainda. Crie o primeiro em "Criar planos".</p>
+    </section>
+
+    <!-- TREINOS > CRIAR PLANOS -->
+    <section class="view" id="view-criar-plano" hidden>
+      <div class="view__header">
+        <h2 id="planoFormTitulo">Criar plano</h2>
+      </div>
+
+      <form id="planoForm" class="card-form">
+        <input type="hidden" name="planoId">
+        <div class="form-row">
+          <label>Nome do plano<input type="text" name="nome" placeholder="Ex: Mod A - Superior" required></label>
+          <label>Grupo muscular
+            <select name="grupoMuscular" required>
+              <option value="Peito">Peito</option>
+              <option value="Costas">Costas</option>
+              <option value="Pernas">Pernas</option>
+              <option value="Ombro">Ombro</option>
+              <option value="Braço">Braço</option>
+              <option value="Abdômen">Abdômen</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Corpo inteiro">Corpo inteiro</option>
+            </select>
+          </label>
+        </div>
+
+        <datalist id="catalogoExerciciosPlano"></datalist>
+
+        <div id="planoExerciciosList"></div>
+        <button type="button" class="btn btn--ghost" id="addExercicioPlanoBtn">+ Adicionar exercício</button>
+        <p class="form-hint">Digite o nome do exercício para ver sugestões da nossa biblioteca (séries/repetições/descanso preenchem sozinhos).</p>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelarPlanoBtn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar plano</button>
+        </div>
+      </form>
+    </section>
+
     <!-- ALUNO (detalhe: treino / avaliação / histórico) -->
     <section class="view" id="view-aluno-detalhe" hidden>
       <button class="auth-back" id="voltarAlunosBtn">← Voltar para alunos</button>
@@ -128,7 +238,6 @@
 
       <div class="tabs">
         <button class="tab is-active" data-tab="treino">Treino</button>
-        <button class="tab" data-tab="avaliacao">Avaliação física</button>
         <button class="tab" data-tab="historico">Histórico</button>
       </div>
 
@@ -136,11 +245,24 @@
       <section class="tab-panel" id="panel-treino">
         <div class="view__header">
           <h3 style="margin:0">Treinos</h3>
-          <button type="button" class="btn btn--primary" id="novoTreinoBtn">+ Novo treino</button>
+          <div class="form-actions">
+            <button type="button" class="btn btn--ghost" id="aplicarPlanoBtn">📋 Aplicar plano da biblioteca</button>
+            <button type="button" class="btn btn--primary" id="novoTreinoBtn">+ Novo treino</button>
+          </div>
         </div>
 
         <div id="treinosLista"></div>
         <p class="empty-state" id="treinosEmpty" hidden>Nenhum treino cadastrado ainda.</p>
+
+        <div class="card-form" id="aplicarPlanoBox" hidden>
+          <label>Qual plano da biblioteca aplicar?
+            <select id="aplicarPlanoSelect"></select>
+          </label>
+          <div class="form-actions">
+            <button type="button" class="btn btn--ghost" id="cancelarAplicarPlanoBtn">Cancelar</button>
+            <button type="button" class="btn btn--primary" id="confirmarAplicarPlanoBtn">Aplicar plano</button>
+          </div>
+        </div>
 
         <div class="card-form" id="copiarTreinoBox" hidden>
           <label>Copiar este treino para qual aluno?
@@ -167,35 +289,6 @@
             <button type="submit" class="btn btn--primary">Salvar treino</button>
           </div>
         </form>
-      </section>
-
-      <!-- AVALIAÇÃO FÍSICA -->
-      <section class="tab-panel" id="panel-avaliacao" hidden>
-        <form id="avaliacaoForm" class="card-form">
-          <div class="form-row">
-            <label>Peso (kg)<input type="number" step="0.1" name="peso" required></label>
-            <label>Altura (m)<input type="number" step="0.01" name="altura" required></label>
-          </div>
-          <div class="form-row">
-            <label>Cintura (cm)<input type="number" step="0.1" name="cintura"></label>
-            <label>Quadril (cm)<input type="number" step="0.1" name="quadril"></label>
-          </div>
-          <div class="form-row">
-            <label>Braço (cm)<input type="number" step="0.1" name="braco"></label>
-            <label>Coxa (cm)<input type="number" step="0.1" name="coxa"></label>
-          </div>
-          <label>Observações<textarea name="observacoes" rows="2"></textarea></label>
-          <div class="form-actions">
-            <button type="submit" class="btn btn--primary">Registrar avaliação</button>
-          </div>
-        </form>
-
-        <h3 class="section-subtitle">Histórico de avaliações</h3>
-        <table class="table">
-          <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>Cintura</th><th>Quadril</th></tr></thead>
-          <tbody id="avaliacoesTbody"></tbody>
-        </table>
-        <p class="empty-state" id="avaliacoesEmpty" hidden>Nenhuma avaliação registrada ainda.</p>
       </section>
 
       <!-- HISTÓRICO DE EXECUÇÕES -->

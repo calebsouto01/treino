@@ -156,6 +156,28 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: 1
 }
 .sidebar__link:hover { background: rgba(255,255,255,0.06); }
 .sidebar__link.is-active { background: var(--primary); color: #fff; }
+
+.sidebar__group { margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.sidebar__group-title {
+  padding: 0.4rem 0.9rem 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8781ab;
+}
+.sidebar__sublink {
+  text-align: left;
+  padding: 0.55rem 0.9rem 0.55rem 1.6rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #cfcbe6;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.sidebar__sublink:hover { background: rgba(255,255,255,0.06); }
+.sidebar__sublink.is-active { background: var(--primary); color: #fff; }
 .sidebar__logout {
   border: 1px solid rgba(255,255,255,0.2);
   background: transparent;

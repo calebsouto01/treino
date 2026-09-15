@@ -8,15 +8,22 @@ avaliação física, execução com feedback obrigatório, evolução).
 
 - **Professor**: painel Início com resumo (ativos, inadimplentes, sumidos há
   +7 dias, mensalidades vencendo, aniversariantes); cadastra seus alunos (com
-  login próprio, busca/filtro por status e observações privadas); prescreve
-  **múltiplos treinos por aluno** com histórico (não sobrescreve o anterior),
-  pode marcar qual está ativo e **copiar um treino para outro aluno**;
-  registra avaliação física (peso, altura, IMC, medidas); controla
-  mensalidades (com resumo de recebido no mês e cobrança rápida via
-  WhatsApp) e check-in; acompanha o histórico de execuções/feedback de cada
-  aluno. Na prescrição, o campo de exercício sugere nomes de uma **biblioteca
-  pré-cadastrada** (`js/exercicios-catalogo.js`) e preenche séries/repetições/
-  descanso automaticamente — mas continua aceitando texto livre.
+  login próprio, busca/filtro por status e observações privadas); mantém uma
+  **biblioteca de planos de treino reutilizáveis** organizados por grupo
+  muscular (Mod A, Mod B...) e **aplica um plano pra qualquer aluno** com um
+  clique, além de continuar podendo montar treinos avulsos por aluno com
+  histórico (não sobrescreve o anterior) e marcar qual está ativo; registra
+  avaliação física (peso, altura, IMC, medidas) numa tela própria (escolhe o
+  aluno, depois vê/lança a avaliação); controla mensalidades (com resumo de
+  recebido no mês e cobrança rápida via WhatsApp) e check-in; acompanha o
+  histórico de execuções/feedback de cada aluno. Na prescrição, o campo de
+  exercício sugere nomes de uma **biblioteca pré-cadastrada**
+  (`js/exercicios-catalogo.js`) e preenche séries/repetições/descanso
+  automaticamente — mas continua aceitando texto livre.
+
+  O menu do professor é organizado em grupos: **Alunos** (Cadastrar,
+  Avaliação), **Treinos** (Treinos — lista de planos por grupo muscular,
+  Criar planos), **Pagamentos** (Visão geral) e **Check-in** (Registrar).
 - **Aluno**: vê o treino atual, executa e **precisa dar feedback para
   concluir** (mesma lógica do MFIT: se tem feedback, o treino foi feito),
   acompanha histórico, gráfico de evolução de peso e faz seu próprio
@@ -50,7 +57,13 @@ professores/{profUid} → { nome, email, criadoEm }   // profUid == uid do profe
     /evolucao/{evoId}           → { peso, data }
   /pagamentos/{pagamentoId}     → { alunoId, alunoNome, valor, mesReferencia, forma, registradoEm }
   /checkins/{checkinId}         → { alunoId, alunoNome, dataHora }
+  /planos/{planoId}             → { nome, grupoMuscular, exercicios:[{nome,series,repeticoes,carga,descanso,videoUrl}], criadoEm }
 ```
+
+`planos/{planoId}` é a **biblioteca de modelos de treino** do professor —
+independente de aluno. "Aplicar plano" (em `alunos/{alunoUid}` > Treino) copia
+o conteúdo de um plano pra um novo doc em `alunos/{alunoUid}/treinos`, do
+mesmo jeito que "copiar treino entre alunos" já funcionava.
 
 `alunos/{alunoUid}.treinoAtivoId` aponta pro treino (dentro de `treinos/`)
 que o aluno está vendo atualmente — o professor pode ter vários treinos
