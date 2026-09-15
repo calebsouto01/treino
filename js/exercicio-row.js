@@ -1,4 +1,4 @@
-import { buscarExercicioPorNome } from "./exercicios-catalogo.js";
+import { buscarExercicioCompleto } from "./exercicios.js";
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -24,7 +24,7 @@ export function criarLinhaExercicio(datalistId, ex = {}) {
   row.querySelector(".remove-exercicio").addEventListener("click", () => row.remove());
 
   row.querySelector('[data-field="nome"]').addEventListener("change", (e) => {
-    const doCatalogo = buscarExercicioPorNome(e.target.value);
+    const doCatalogo = buscarExercicioCompleto(e.target.value);
     if (!doCatalogo) return;
     row.querySelector('[data-field="series"]').value = doCatalogo.series;
     row.querySelector('[data-field="repeticoes"]').value = doCatalogo.repeticoes;

@@ -18,13 +18,10 @@ import { initPagamentos } from "./pagamentos.js";
 import { initCheckin } from "./checkin.js";
 import { initPlanos, getPlanosCache } from "./planos.js";
 import { initAvaliacao } from "./avaliacao.js";
-import { CATALOGO_EXERCICIOS } from "./exercicios-catalogo.js";
+import { initAparelhos } from "./aparelhos.js";
+import { initExercicios } from "./exercicios.js";
 import { criarLinhaExercicio, lerExerciciosDoContainer } from "./exercicio-row.js";
 import { irParaView } from "./nav.js";
-
-document.getElementById("catalogoExercicios").innerHTML = CATALOGO_EXERCICIOS.map(
-  (ex) => `<option value="${ex.nome}">${ex.grupo}</option>`
-).join("");
 
 document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
@@ -400,6 +397,8 @@ requireRole("professor", (usuario) => {
   initAlunos();
   initPagamentos();
   initCheckin();
+  initAparelhos();
+  initExercicios();
   initPlanos();
   initAvaliacao();
   carregarDashboard();

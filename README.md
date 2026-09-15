@@ -17,13 +17,17 @@ avaliação física, execução com feedback obrigatório, evolução).
   aluno, depois vê/lança a avaliação); controla mensalidades (com resumo de
   recebido no mês e cobrança rápida via WhatsApp) e check-in; acompanha o
   histórico de execuções/feedback de cada aluno. Na prescrição, o campo de
-  exercício sugere nomes de uma **biblioteca pré-cadastrada**
-  (`js/exercicios-catalogo.js`) e preenche séries/repetições/descanso
-  automaticamente — mas continua aceitando texto livre.
+  exercício sugere nomes tanto da **biblioteca fixa pré-cadastrada**
+  (`js/exercicios-catalogo.js`) quanto dos **exercícios próprios do
+  professor** (cadastro editável, cada um com grupo muscular, aparelho
+  vinculado e séries/repetições/descanso padrão) e preenche esses campos
+  automaticamente — mas continua aceitando texto livre. Os aparelhos também
+  têm cadastro próprio, reaproveitado no campo "aparelho" de cada exercício.
 
   O menu do professor é organizado em grupos: **Alunos** (Cadastrar,
   Avaliação), **Treinos** (Treinos — lista de planos por grupo muscular,
-  Criar planos), **Pagamentos** (Visão geral) e **Check-in** (Registrar).
+  Criar planos, Exercícios, Aparelhos), **Pagamentos** (Visão geral) e
+  **Check-in** (Registrar).
 - **Aluno**: vê o treino atual, executa e **precisa dar feedback para
   concluir** (mesma lógica do MFIT: se tem feedback, o treino foi feito),
   acompanha histórico, gráfico de evolução de peso e faz seu próprio
@@ -58,12 +62,22 @@ professores/{profUid} → { nome, email, criadoEm }   // profUid == uid do profe
   /pagamentos/{pagamentoId}     → { alunoId, alunoNome, valor, mesReferencia, forma, registradoEm }
   /checkins/{checkinId}         → { alunoId, alunoNome, dataHora }
   /planos/{planoId}             → { nome, grupoMuscular, exercicios:[{nome,series,repeticoes,carga,descanso,videoUrl}], criadoEm }
+  /exercicios/{exercicioId}     → { nome, grupoMuscular, aparelho, series, repeticoes, descanso, criadoEm }
+  /aparelhos/{aparelhoId}       → { nome, criadoEm }
 ```
 
 `planos/{planoId}` é a **biblioteca de modelos de treino** do professor —
 independente de aluno. "Aplicar plano" (em `alunos/{alunoUid}` > Treino) copia
 o conteúdo de um plano pra um novo doc em `alunos/{alunoUid}/treinos`, do
 mesmo jeito que "copiar treino entre alunos" já funcionava.
+
+`exercicios/{exercicioId}` e `aparelhos/{aparelhoId}` são cadastros próprios
+do professor (Treinos > Exercícios / Aparelhos). Os exercícios próprios
+entram automaticamente nas sugestões de autocomplete (`js/exercicios.js`
+mescla com `js/exercicios-catalogo.js`) usadas tanto no form de treino
+avulso quanto no form de plano — o `aparelho` de cada exercício é um campo
+de texto preenchido a partir da lista de `aparelhos`, sem exigir que o
+exercício aponte pra um documento específico.
 
 `alunos/{alunoUid}.treinoAtivoId` aponta pro treino (dentro de `treinos/`)
 que o aluno está vendo atualmente — o professor pode ter vários treinos
@@ -97,8 +111,6 @@ de Cloud Functions/Admin SDK.
   pagamentos continuam sendo registrados manualmente pelo professor
 - Um único protocolo de avaliação física (peso/altura/IMC/medidas), em vez
   dos 11 protocolos de dobras cutâneas do MFIT
-- A biblioteca de exercícios é uma lista fixa no código (`js/exercicios-catalogo.js`),
-  não um cadastro editável pelo professor dentro do app
 - "Vencendo esta semana" e "aniversariantes do mês" no dashboard são
   calculados no navegador a partir do dia/data cadastrado — não há
   notificação push nem e-mail automático ainda

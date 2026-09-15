@@ -63,3 +63,7 @@ export function buscarExercicioPorNome(nome) {
   const alvo = nome.trim().toLowerCase();
   return CATALOGO_EXERCICIOS.find((ex) => ex.nome.toLowerCase() === alvo) || null;
 }
+
+// Grupos usados tanto no cadastro de exercícios quanto no de planos, pra
+// manter as duas telas com a mesma categorização.
+export const GRUPOS_MUSCULARES = ["Peito", "Costas", "Pernas", "Ombro", "Braço", "Abdômen", "Cardio", "Corpo inteiro"];

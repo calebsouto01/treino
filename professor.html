@@ -23,6 +23,8 @@
         <div class="sidebar__group-title">🏋️ Treinos</div>
         <button class="sidebar__sublink" data-view="treinos">Treinos</button>
         <button class="sidebar__sublink" data-view="criar-plano">Criar planos</button>
+        <button class="sidebar__sublink" data-view="exercicios">Exercícios</button>
+        <button class="sidebar__sublink" data-view="aparelhos">Aparelhos</button>
       </div>
 
       <div class="sidebar__group">
@@ -224,6 +226,80 @@
           <button type="submit" class="btn btn--primary">Salvar plano</button>
         </div>
       </form>
+    </section>
+
+    <!-- TREINOS > EXERCÍCIOS -->
+    <section class="view" id="view-exercicios" hidden>
+      <div class="view__header">
+        <h2>Exercícios</h2>
+        <button type="button" class="btn btn--primary" id="novoExercicioBtn">+ Novo exercício</button>
+      </div>
+
+      <form id="exercicioForm" class="card-form" hidden>
+        <input type="hidden" name="exercicioId">
+        <div class="form-row">
+          <label>Nome<input type="text" name="nome" placeholder="Ex: Supino reto" required></label>
+          <label>Grupo muscular
+            <select name="grupoMuscular" required>
+              <option value="Peito">Peito</option>
+              <option value="Costas">Costas</option>
+              <option value="Pernas">Pernas</option>
+              <option value="Ombro">Ombro</option>
+              <option value="Braço">Braço</option>
+              <option value="Abdômen">Abdômen</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Corpo inteiro">Corpo inteiro</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Aparelho
+            <select name="aparelho">
+              <option value="">Nenhum</option>
+            </select>
+          </label>
+          <label>Séries<input type="number" name="series" min="1" value="3" required></label>
+        </div>
+        <div class="form-row">
+          <label>Repetições<input type="text" name="repeticoes" value="12" required></label>
+          <label>Descanso<input type="text" name="descanso" value="60s"></label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelarExercicioBtn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar exercício</button>
+        </div>
+      </form>
+
+      <table class="table">
+        <thead>
+          <tr><th>Nome</th><th>Grupo</th><th>Aparelho</th><th>Séries</th><th>Repetições</th><th>Descanso</th><th></th></tr>
+        </thead>
+        <tbody id="exerciciosTbody"></tbody>
+      </table>
+      <p class="empty-state" id="exerciciosEmpty" hidden>Nenhum exercício próprio cadastrado ainda. A biblioteca padrão continua disponível nas sugestões dos formulários de treino.</p>
+    </section>
+
+    <!-- TREINOS > APARELHOS -->
+    <section class="view" id="view-aparelhos" hidden>
+      <div class="view__header">
+        <h2>Aparelhos</h2>
+        <button type="button" class="btn btn--primary" id="novoAparelhoBtn">+ Novo aparelho</button>
+      </div>
+
+      <form id="aparelhoForm" class="card-form" hidden>
+        <input type="hidden" name="aparelhoId">
+        <label>Nome<input type="text" name="nome" placeholder="Ex: Leg press 45°" required></label>
+        <div class="form-actions">
+          <button type="button" class="btn btn--ghost" id="cancelarAparelhoBtn">Cancelar</button>
+          <button type="submit" class="btn btn--primary">Salvar aparelho</button>
+        </div>
+      </form>
+
+      <table class="table">
+        <thead><tr><th>Nome</th><th></th></tr></thead>
+        <tbody id="aparelhosTbody"></tbody>
+      </table>
+      <p class="empty-state" id="aparelhosEmpty" hidden>Nenhum aparelho cadastrado ainda.</p>
     </section>
 
     <!-- ALUNO (detalhe: treino / avaliação / histórico) -->

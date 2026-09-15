@@ -69,6 +69,14 @@ service cloud.firestore {
         allow read, write: if isProfessor(profId);
       }
 
+      match /exercicios/{exercicioId} {
+        allow read, write: if isProfessor(profId);
+      }
+
+      match /aparelhos/{aparelhoId} {
+        allow read, write: if isProfessor(profId);
+      }
+
       match /checkins/{checkinId} {
         allow read: if isProfessor(profId);
         allow create: if isProfessor(profId) || isSignedIn() && userDoc().role == 'aluno' && userDoc().professorId == profId;

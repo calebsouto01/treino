@@ -1,7 +1,7 @@
 import { db } from "./firebase-config.js";
 import { state } from "./state.js";
 import { escapeHtml } from "./alunos.js";
-import { CATALOGO_EXERCICIOS } from "./exercicios-catalogo.js";
+import { GRUPOS_MUSCULARES } from "./exercicios-catalogo.js";
 import { criarLinhaExercicio, lerExerciciosDoContainer } from "./exercicio-row.js";
 import { irParaView } from "./nav.js";
 import {
@@ -16,7 +16,6 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-const GRUPOS_ORDEM = ["Peito", "Costas", "Pernas", "Ombro", "Braço", "Abdômen", "Cardio", "Corpo inteiro"];
 const DATALIST_ID = "catalogoExerciciosPlano";
 
 function planosCol() {
@@ -30,10 +29,6 @@ export function getPlanosCache() {
 }
 
 export function initPlanos() {
-  document.getElementById(DATALIST_ID).innerHTML = CATALOGO_EXERCICIOS.map(
-    (ex) => `<option value="${ex.nome}">${ex.grupo}</option>`
-  ).join("");
-
   const form = document.getElementById("planoForm");
   const exerciciosList = document.getElementById("planoExerciciosList");
 
@@ -94,7 +89,7 @@ function renderPlanos() {
   container.innerHTML = "";
   empty.hidden = planosCache.length > 0;
 
-  GRUPOS_ORDEM.forEach((grupo) => {
+  GRUPOS_MUSCULARES.forEach((grupo) => {
     const doGrupo = planosCache.filter((p) => (p.grupoMuscular || "Corpo inteiro") === grupo);
     if (doGrupo.length === 0) return;
 
