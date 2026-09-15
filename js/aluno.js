@@ -23,7 +23,7 @@ function escapeHtml(str) {
 }
 
 function alunoRef() {
-  return doc(db, "academias", state.academiaId, "alunos", state.uid);
+  return doc(db, "professores", state.professorId, "alunos", state.uid);
 }
 
 // ---------- Navegação ----------
@@ -197,7 +197,7 @@ document.getElementById("pesoForm").addEventListener("submit", async (e) => {
 // ---------- Check-in ----------
 
 document.getElementById("checkinBtn").addEventListener("click", async () => {
-  await addDoc(collection(db, "academias", state.academiaId, "checkins"), {
+  await addDoc(collection(db, "professores", state.professorId, "checkins"), {
     alunoId: state.uid,
     alunoNome: state.nome,
     dataHora: serverTimestamp(),
@@ -208,7 +208,7 @@ function carregarMeusCheckins() {
   const tbody = document.getElementById("meusCheckinsTbody");
   const empty = document.getElementById("meusCheckinsEmpty");
 
-  const q = query(collection(db, "academias", state.academiaId, "checkins"), where("alunoId", "==", state.uid));
+  const q = query(collection(db, "professores", state.professorId, "checkins"), where("alunoId", "==", state.uid));
   onSnapshot(q, (snap) => {
     const checkins = snap.docs
       .map((d) => d.data())
@@ -235,7 +235,7 @@ function carregarMeusCheckins() {
 requireRole("aluno", (usuario) => {
   state.uid = usuario.uid;
   state.role = usuario.role;
-  state.academiaId = usuario.academiaId;
+  state.professorId = usuario.professorId;
   state.nome = usuario.nome;
   document.getElementById("nomeAluno").textContent = usuario.nome || "Aluno";
 

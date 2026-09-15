@@ -10,85 +10,64 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
     }
 
-    function userAcademiaId() {
-      return userDoc().academiaId;
+    function isProfessor(profId) {
+      return isSignedIn() && userDoc().role == 'professor' && request.auth.uid == profId;
     }
 
-    function userRole() {
-      return userDoc().role;
-    }
-
-    function isAdmin(academiaId) {
-      return isSignedIn() && userAcademiaId() == academiaId && userRole() == 'admin';
-    }
-
-    function isProfessor(academiaId) {
-      return isSignedIn() && userAcademiaId() == academiaId && userRole() == 'professor';
-    }
-
-    function isAluno(academiaId, alunoId) {
-      return isSignedIn() && userAcademiaId() == academiaId && userRole() == 'aluno' && request.auth.uid == alunoId;
-    }
-
-    function isStaff(academiaId) {
-      return isAdmin(academiaId) || isProfessor(academiaId);
+    function isAluno(profId, alunoId) {
+      return isSignedIn() && userDoc().role == 'aluno'
+        && userDoc().professorId == profId && request.auth.uid == alunoId;
     }
 
     match /usuarios/{uid} {
       allow read, update: if isSignedIn() && request.auth.uid == uid;
-      // Um admin também pode criar o usuarios/{uid} de um professor/aluno que
-      // acabou de registrar (a conta de Auth é criada num app Firebase
-      // secundário, mas o Firestore precisa que o admin, já autenticado,
-      // grave o vínculo dessa nova conta com a academia).
-      allow create: if isSignedIn() && (request.auth.uid == uid || isAdmin(request.resource.data.academiaId));
+      // Um professor também pode criar o usuarios/{uid} de um aluno que
+      // acabou de cadastrar (a conta de Auth é criada num app Firebase
+      // secundário, mas o Firestore precisa que o professor, já
+      // autenticado, grave o vínculo dessa nova conta).
+      allow create: if isSignedIn() && (request.auth.uid == uid || isProfessor(request.resource.data.professorId));
       allow delete: if false;
     }
 
-    match /academias/{academiaId} {
-      allow create: if isSignedIn();
-      allow read: if isSignedIn() && userAcademiaId() == academiaId;
-      allow update: if isAdmin(academiaId);
+    match /professores/{profId} {
+      allow create: if isSignedIn() && request.auth.uid == profId;
+      allow read, update: if isProfessor(profId);
       allow delete: if false;
 
-      match /professores/{profId} {
-        allow read: if isStaff(academiaId) || isAluno(academiaId, request.auth.uid);
-        allow write: if isAdmin(academiaId);
-      }
-
-      match /pagamentos/{pagamentoId} {
-        allow read, write: if isAdmin(academiaId);
-      }
-
-      match /checkins/{checkinId} {
-        allow read: if isStaff(academiaId);
-        allow create: if isStaff(academiaId) || isSignedIn() && userAcademiaId() == academiaId;
-      }
-
       match /alunos/{alunoId} {
-        allow read: if isStaff(academiaId) || isAluno(academiaId, alunoId);
-        allow write: if isAdmin(academiaId);
+        allow read: if isProfessor(profId) || isAluno(profId, alunoId);
+        allow write: if isProfessor(profId);
 
         match /treinos/{treinoId} {
-          allow read: if isStaff(academiaId) || isAluno(academiaId, alunoId);
-          allow write: if isStaff(academiaId);
-        }
-
-        match /execucoes/{execId} {
-          allow read: if isStaff(academiaId) || isAluno(academiaId, alunoId);
-          allow create: if isAluno(academiaId, alunoId);
-          allow update, delete: if false;
+          allow read: if isProfessor(profId) || isAluno(profId, alunoId);
+          allow write: if isProfessor(profId);
         }
 
         match /avaliacoes/{avalId} {
-          allow read: if isStaff(academiaId) || isAluno(academiaId, alunoId);
-          allow write: if isStaff(academiaId);
+          allow read: if isProfessor(profId) || isAluno(profId, alunoId);
+          allow write: if isProfessor(profId);
+        }
+
+        match /execucoes/{execId} {
+          allow read: if isProfessor(profId) || isAluno(profId, alunoId);
+          allow create: if isAluno(profId, alunoId);
+          allow update, delete: if false;
         }
 
         match /evolucao/{evoId} {
-          allow read: if isStaff(academiaId) || isAluno(academiaId, alunoId);
-          allow create: if isStaff(academiaId) || isAluno(academiaId, alunoId);
+          allow read: if isProfessor(profId) || isAluno(profId, alunoId);
+          allow create: if isProfessor(profId) || isAluno(profId, alunoId);
           allow update, delete: if false;
         }
+      }
+
+      match /pagamentos/{pagamentoId} {
+        allow read, write: if isProfessor(profId);
+      }
+
+      match /checkins/{checkinId} {
+        allow read: if isProfessor(profId);
+        allow create: if isProfessor(profId) || isSignedIn() && userDoc().role == 'aluno' && userDoc().professorId == profId;
       }
     }
   }

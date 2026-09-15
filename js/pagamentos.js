@@ -13,11 +13,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 function pagamentosCol() {
-  return collection(db, "academias", state.academiaId, "pagamentos");
+  return collection(db, "professores", state.professorId, "pagamentos");
 }
 
 function alunosCol() {
-  return collection(db, "academias", state.academiaId, "alunos");
+  return collection(db, "professores", state.professorId, "alunos");
 }
 
 function populateAlunoSelect(select) {

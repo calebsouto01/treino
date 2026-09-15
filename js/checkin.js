@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 function checkinsCol() {
-  return collection(db, "academias", state.academiaId, "checkins");
+  return collection(db, "professores", state.professorId, "checkins");
 }
 
 function populateAlunoSelect(select) {

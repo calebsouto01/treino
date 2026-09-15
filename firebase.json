@@ -10,7 +10,8 @@
       "README.md"
     ],
     "rewrites": [
-      { "source": "/app", "destination": "/app.html" }
+      { "source": "/professor", "destination": "/professor.html" },
+      { "source": "/aluno", "destination": "/aluno.html" }
     ]
   },
   "firestore": {

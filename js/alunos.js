@@ -16,17 +16,11 @@ import {
 const STATUS_LABEL = { ativo: "Ativo", inadimplente: "Inadimplente", inativo: "Inativo" };
 
 function alunosCol() {
-  return collection(db, "academias", state.academiaId, "alunos");
+  return collection(db, "professores", state.professorId, "alunos");
 }
 
 function notifyAlunosUpdated() {
   document.dispatchEvent(new CustomEvent("alunos-updated"));
-}
-
-function nomeProfessor(professorId) {
-  if (!professorId) return "-";
-  const prof = state.professoresCache.find((p) => p.id === professorId);
-  return prof ? prof.nome : "-";
 }
 
 export function initAlunos() {
@@ -63,7 +57,6 @@ export function initAlunos() {
       nome: data.get("nome").trim(),
       telefone: data.get("telefone").trim(),
       plano: data.get("plano"),
-      professorId: data.get("professorId") || null,
       diaVencimento: Number(data.get("diaVencimento")) || 10,
       status: data.get("status"),
     };
@@ -90,7 +83,7 @@ export function initAlunos() {
       await setDoc(doc(db, "usuarios", uid), {
         nome: payload.nome,
         email,
-        academiaId: state.academiaId,
+        professorId: state.professorId,
         role: "aluno",
         criadoEm: serverTimestamp(),
       });
@@ -105,19 +98,6 @@ export function initAlunos() {
     renderAlunos(state.alunosCache, tbody, empty, form, emailInput, senhaInput, hint);
     notifyAlunosUpdated();
   });
-
-  document.addEventListener("professores-updated", () => {
-    populateProfessorSelect(document.getElementById("alunoProfessorSelect"));
-    renderAlunos(state.alunosCache, tbody, empty, form, emailInput, senhaInput, hint);
-  });
-}
-
-function populateProfessorSelect(select) {
-  const selecionado = select.value;
-  select.innerHTML =
-    '<option value="">Sem professor</option>' +
-    state.professoresCache.map((p) => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join("");
-  if (selecionado) select.value = selecionado;
 }
 
 function mapAuthError(err) {
@@ -138,16 +118,24 @@ function renderAlunos(alunos, tbody, empty, form, emailInput, senhaInput, hint) 
     tr.innerHTML = `
       <td>${escapeHtml(aluno.nome)}</td>
       <td>${escapeHtml(aluno.telefone || "-")}</td>
-      <td>${escapeHtml(nomeProfessor(aluno.professorId))}</td>
       <td>${escapeHtml(aluno.plano || "-")}</td>
       <td><span class="badge badge--${aluno.status}">${STATUS_LABEL[aluno.status] || aluno.status}</span></td>
       <td>Dia ${aluno.diaVencimento || "-"}</td>
       <td class="table__actions">
+        <button data-action="gerenciar" data-id="${aluno.id}" class="link-btn">Gerenciar</button>
         <button data-action="editar" data-id="${aluno.id}" class="link-btn">Editar</button>
         <button data-action="excluir" data-id="${aluno.id}" class="link-btn link-btn--danger">Excluir</button>
       </td>
     `;
     tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('[data-action="gerenciar"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const aluno = alunos.find((a) => a.id === btn.dataset.id);
+      if (!aluno) return;
+      document.dispatchEvent(new CustomEvent("aluno-selecionado", { detail: aluno }));
+    });
   });
 
   tbody.querySelectorAll('[data-action="editar"]').forEach((btn) => {
@@ -164,7 +152,6 @@ function renderAlunos(alunos, tbody, empty, form, emailInput, senhaInput, hint) 
       senhaInput.required = false;
       hint.hidden = false;
       form.elements.plano.value = aluno.plano || "mensal";
-      form.elements.professorId.value = aluno.professorId || "";
       form.elements.diaVencimento.value = aluno.diaVencimento || 10;
       form.elements.status.value = aluno.status || "ativo";
       form.hidden = false;
@@ -184,5 +171,3 @@ export function escapeHtml(str) {
   div.textContent = str ?? "";
   return div.innerHTML;
 }
-
-export { populateProfessorSelect };

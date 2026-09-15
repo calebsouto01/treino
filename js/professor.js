@@ -10,16 +10,14 @@ import {
   getDoc,
   onSnapshot,
   query,
-  where,
   orderBy,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { initAlunos } from "./alunos.js";
+import { initPagamentos } from "./pagamentos.js";
+import { initCheckin } from "./checkin.js";
 
 document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
-
-let alunoAtualId = null;
-let unsubAvaliacoes = null;
-let unsubExecucoes = null;
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -28,45 +26,48 @@ function escapeHtml(str) {
 }
 
 function alunoRef(alunoId) {
-  return doc(db, "academias", state.academiaId, "alunos", alunoId);
+  return doc(db, "professores", state.professorId, "alunos", alunoId);
 }
 
-// ---------- Lista de alunos ----------
+// ---------- Navegação principal ----------
 
-function renderAlunosList(alunos) {
-  const container = document.getElementById("alunosList");
-  container.innerHTML = "";
+const views = document.querySelectorAll(".view");
+const navLinks = document.querySelectorAll(".sidebar__link");
 
-  if (alunos.length === 0) {
-    container.innerHTML = '<p class="empty-state">Nenhum aluno vinculado a você ainda.</p>';
-    return;
-  }
-
-  alunos.forEach((aluno) => {
-    const btn = document.createElement("button");
-    btn.className = "aluno-item" + (aluno.id === alunoAtualId ? " is-active" : "");
-    btn.textContent = aluno.nome;
-    btn.addEventListener("click", () => selecionarAluno(aluno));
-    container.appendChild(btn);
+navLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    navLinks.forEach((l) => l.classList.remove("is-active"));
+    link.classList.add("is-active");
+    const target = link.dataset.view;
+    views.forEach((v) => (v.hidden = v.id !== `view-${target}`));
   });
-}
+});
 
-function selecionarAluno(aluno) {
+// ---------- Ir para o detalhe de um aluno ----------
+
+let alunoAtualId = null;
+let unsubAvaliacoes = null;
+let unsubExecucoes = null;
+
+document.addEventListener("aluno-selecionado", (e) => {
+  const aluno = e.detail;
   alunoAtualId = aluno.id;
-  document.getElementById("nenhumAlunoSelecionado").hidden = true;
-  document.getElementById("alunoDetalhe").hidden = false;
-  document.getElementById("alunoNomeTitulo").textContent = aluno.nome;
 
-  document.querySelectorAll(".aluno-item").forEach((el) => {
-    el.classList.toggle("is-active", el.textContent === aluno.nome);
-  });
+  navLinks.forEach((l) => l.classList.remove("is-active"));
+  views.forEach((v) => (v.hidden = v.id !== "view-aluno-detalhe"));
+  document.getElementById("alunoNomeTitulo").textContent = aluno.nome;
 
   carregarTreino(aluno.id);
   carregarAvaliacoes(aluno.id);
   carregarExecucoes(aluno.id);
-}
+});
 
-// ---------- Tabs ----------
+document.getElementById("voltarAlunosBtn").addEventListener("click", () => {
+  views.forEach((v) => (v.hidden = v.id !== "view-alunos"));
+  navLinks.forEach((l) => l.classList.toggle("is-active", l.dataset.view === "alunos"));
+});
+
+// ---------- Tabs do detalhe ----------
 
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -129,7 +130,6 @@ document.getElementById("treinoForm").addEventListener("submit", async (e) => {
 
   await setDoc(doc(alunoRef(alunoAtualId), "treinos", "atual"), {
     nome: form.elements.nome.value.trim(),
-    professorId: state.uid,
     exercicios,
     atualizadoEm: serverTimestamp(),
   });
@@ -185,7 +185,6 @@ document.getElementById("avaliacaoForm").addEventListener("submit", async (e) =>
     braco: data.get("braco") ? Number(data.get("braco")) : null,
     coxa: data.get("coxa") ? Number(data.get("coxa")) : null,
     observacoes: data.get("observacoes").trim(),
-    professorId: state.uid,
     data: serverTimestamp(),
   });
 
@@ -224,13 +223,11 @@ function carregarExecucoes(alunoId) {
 requireRole("professor", (usuario) => {
   state.uid = usuario.uid;
   state.role = usuario.role;
-  state.academiaId = usuario.academiaId;
+  state.professorId = usuario.professorId;
+  state.nome = usuario.nome;
   document.getElementById("nomeProfessor").textContent = usuario.nome || "Professor";
 
-  const q = query(collection(db, "academias", state.academiaId, "alunos"), where("professorId", "==", usuario.uid));
-
-  onSnapshot(q, (snap) => {
-    const alunos = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => a.nome.localeCompare(b.nome));
-    renderAlunosList(alunos);
-  });
+  initAlunos();
+  initPagamentos();
+  initCheckin();
 });

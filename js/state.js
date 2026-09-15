@@ -2,8 +2,6 @@ export const state = {
   uid: null,
   role: null,
   nome: null,
-  academiaId: null,
-  nomeAcademia: null,
+  professorId: null,
   alunosCache: [],
-  professoresCache: [],
 };

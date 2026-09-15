@@ -1,25 +1,23 @@
 # Academia SaaS
 
-SaaS de gestão de academias com 3 papéis de acesso — **academia (admin)**,
-**professor** e **aluno** — inspirado nas funcionalidades do MFIT Personal
-(prescrição de treino, avaliação física, execução com feedback obrigatório,
-evolução) adaptadas para um produto multi-tenant com gestão de múltiplos
-professores por academia.
+Sistema para personal trainers, com **2 papéis** — **professor** e **aluno**
+— inspirado nas funcionalidades do MFIT Personal (prescrição de treino,
+avaliação física, execução com feedback obrigatório, evolução).
 
 ## Papéis
 
-- **Academia (admin)**: cadastra professores e alunos, vincula aluno↔professor,
-  controla mensalidades e check-in geral.
-- **Professor**: vê apenas os alunos vinculados a ele, prescreve treino
-  (exercícios com séries/repetições/carga/descanso), registra avaliação física
-  (peso, altura, IMC, medidas) e acompanha o histórico de execuções/feedback.
-- **Aluno**: vê o treino atual, executa e **precisa dar feedback para concluir**
-  (mesma lógica do MFIT: se tem feedback, o treino foi feito), acompanha
-  histórico, gráfico de evolução de peso e faz seu próprio check-in.
+- **Professor**: cadastra seus alunos (com login próprio), prescreve treino
+  (exercícios com séries/repetições/carga/descanso), registra avaliação
+  física (peso, altura, IMC, medidas), controla mensalidades e check-in, e
+  acompanha o histórico de execuções/feedback de cada aluno.
+- **Aluno**: vê o treino atual, executa e **precisa dar feedback para
+  concluir** (mesma lógica do MFIT: se tem feedback, o treino foi feito),
+  acompanha histórico, gráfico de evolução de peso e faz seu próprio
+  check-in.
 
-Todos os papéis fazem login pela mesma tela (`index.html`); só quem cria uma
-academia (aba "Criar conta") é o admin — professores e alunos recebem o
-acesso (e-mail + senha) diretamente do admin/professor, sem autocadastro.
+Na tela inicial (`index.html`) a pessoa escolhe primeiro "Sou Professor" ou
+"Sou Aluno" e só depois vê o formulário de login — só o professor tem opção
+de "Criar conta"; o aluno recebe e-mail/senha do próprio professor.
 
 ## Stack
 
@@ -30,48 +28,49 @@ acesso (e-mail + senha) diretamente do admin/professor, sem autocadastro.
 ## Estrutura de dados (Firestore)
 
 ```
-usuarios/{uid} → { nome, email, academiaId, role: 'admin'|'professor'|'aluno' }
+usuarios/{uid} → { nome, email, role: 'professor'|'aluno', professorId }
+  // para professor: professorId == uid (o próprio)
+  // para aluno: professorId == uid do professor que o criou
 
-academias/{academiaId} → { nome, donoUid, criadoEm }   // {academiaId} == uid do admin dono
-  /professores/{profUid}        → { nome, email, ativo, criadoEm }
-  /pagamentos/{pagamentoId}     → { alunoId, alunoNome, valor, mesReferencia, forma, registradoEm }
-  /checkins/{checkinId}         → { alunoId, alunoNome, dataHora }
-  /alunos/{alunoUid}            → { nome, telefone, email, plano, status, diaVencimento, professorId }
-    /treinos/atual              → { nome, professorId, exercicios:[{nome,series,repeticoes,carga,descanso}] }
+professores/{profUid} → { nome, email, criadoEm }   // profUid == uid do professor
+  /alunos/{alunoUid} → { nome, telefone, email, plano, status, diaVencimento }
+    /treinos/atual              → { nome, exercicios:[{nome,series,repeticoes,carga,descanso}] }
     /execucoes/{execId}         → { treinoNome, exerciciosFeitos:[...], feedback, nota, data }
     /avaliacoes/{avalId}        → { peso, altura, cintura, quadril, braco, coxa, observacoes, data }
     /evolucao/{evoId}           → { peso, data }
+  /pagamentos/{pagamentoId}     → { alunoId, alunoNome, valor, mesReferencia, forma, registradoEm }
+  /checkins/{checkinId}         → { alunoId, alunoNome, dataHora }
 ```
 
-`alunos/{alunoUid}` e `professores/{profUid}` são criados com o **próprio uid
-da conta Firebase Auth da pessoa** (não um ID aleatório) — isso é o que
-permite as regras de segurança restringirem cada aluno/professor aos seus
-próprios dados sem precisar de lógica extra no servidor.
+`alunos/{alunoUid}` é criado com o **próprio uid da conta Firebase Auth do
+aluno** (não um ID aleatório) — isso é o que permite as regras de segurança
+restringirem cada aluno aos seus próprios dados sem lógica extra no servidor.
 
-As regras (`firestore.rules`) implementam esse controle por papel: admin tem
-acesso total à sua academia; professor só lê/edita alunos e treinos da sua
-academia; aluno só lê/edita os próprios dados (treino, execuções, evolução).
+As regras (`firestore.rules`) garantem que: o professor só acessa os
+próprios `professores/{profId}/...`; o aluno só lê/edita os próprios dados
+(seu registro, treino, execuções, evolução) dentro do professor a que
+pertence.
 
 ### Truque de criação de conta sem deslogar
 
 Como o SDK do Firebase Auth no navegador só mantém uma sessão ativa por vez,
-criar a conta de um professor/aluno teria o efeito colateral de deslogar quem
-está criando. Para evitar isso, `js/create-user.js` cria um **app Firebase
-secundário temporário** (`initializeApp(config, "secundario-...")`), registra
-a nova conta nele, e descarta o app — sem afetar a sessão do admin/professor
-que fez a ação. É a abordagem padrão da comunidade para esse cenário sem
-precisar de Cloud Functions/Admin SDK.
+criar a conta de um aluno teria o efeito colateral de deslogar o professor
+que está criando. Para evitar isso, `js/create-user.js` cria um **app
+Firebase secundário temporário** (`initializeApp(config, "secundario-...")`),
+registra a nova conta nele, e descarta o app — sem afetar a sessão do
+professor. É a abordagem padrão da comunidade para esse cenário sem precisar
+de Cloud Functions/Admin SDK.
 
 ## Simplificações conscientes em relação ao MFIT
 
 - Sem biblioteca de vídeos de exercícios (só texto/observações no exercício)
 - Sem gateway de pagamento integrado (Pix/boleto/cartão automático) — os
-  pagamentos continuam sendo registrados manualmente pelo admin
+  pagamentos continuam sendo registrados manualmente pelo professor
 - Um único protocolo de avaliação física (peso/altura/IMC/medidas), em vez
   dos 11 protocolos de dobras cutâneas do MFIT
 - Um treino "atual" por aluno (não há histórico de várias rotinas paralelas)
-- Excluir um aluno/professor remove o registro no Firestore, mas não a conta
-  no Firebase Authentication (precisaria do Admin SDK/Cloud Functions)
+- Excluir um aluno remove o registro no Firestore, mas não a conta no
+  Firebase Authentication (precisaria do Admin SDK/Cloud Functions)
 
 ## Rodando localmente
 
