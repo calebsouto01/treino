@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userAcademiaId() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.academiaId;
+    }
+
+    match /usuarios/{uid} {
+      allow read, create, update: if isSignedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    match /academias/{academiaId} {
+      allow create: if isSignedIn();
+      allow read, update: if isSignedIn() && userAcademiaId() == academiaId;
+      allow delete: if false;
+
+      match /alunos/{alunoId} {
+        allow read, write: if isSignedIn() && userAcademiaId() == academiaId;
+      }
+
+      match /pagamentos/{pagamentoId} {
+        allow read, write: if isSignedIn() && userAcademiaId() == academiaId;
+      }
+
+      match /checkins/{checkinId} {
+        allow read, write: if isSignedIn() && userAcademiaId() == academiaId;
+      }
+    }
+  }
+}

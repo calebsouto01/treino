@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Academia SaaS – Entrar</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+    <h1 class="auth-logo">🏋️ Academia<span>SaaS</span></h1>
+
+    <div class="auth-tabs">
+      <button class="auth-tab is-active" data-tab="login">Entrar</button>
+      <button class="auth-tab" data-tab="signup">Criar conta</button>
+    </div>
+
+    <form id="loginForm" class="auth-form">
+      <label>E-mail
+        <input type="email" name="email" required placeholder="voce@email.com">
+      </label>
+      <label>Senha
+        <input type="password" name="senha" required placeholder="••••••••" minlength="6">
+      </label>
+      <p class="auth-error" id="loginError" hidden></p>
+      <button type="submit" class="btn btn--primary btn--block">Entrar</button>
+    </form>
+
+    <form id="signupForm" class="auth-form" hidden>
+      <label>Nome da academia
+        <input type="text" name="nomeAcademia" required placeholder="Ex: PowerFit Academia">
+      </label>
+      <label>Seu nome
+        <input type="text" name="nome" required placeholder="Seu nome completo">
+      </label>
+      <label>E-mail
+        <input type="email" name="email" required placeholder="voce@email.com">
+      </label>
+      <label>Senha
+        <input type="password" name="senha" required placeholder="Mínimo 6 caracteres" minlength="6">
+      </label>
+      <p class="auth-error" id="signupError" hidden></p>
+      <button type="submit" class="btn btn--primary btn--block">Criar conta e começar</button>
+    </form>
+  </div>
+
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>
