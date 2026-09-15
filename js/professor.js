@@ -16,6 +16,11 @@ import {
 import { initAlunos } from "./alunos.js";
 import { initPagamentos } from "./pagamentos.js";
 import { initCheckin } from "./checkin.js";
+import { CATALOGO_EXERCICIOS, buscarExercicioPorNome } from "./exercicios-catalogo.js";
+
+document.getElementById("catalogoExercicios").innerHTML = CATALOGO_EXERCICIOS.map(
+  (ex) => `<option value="${ex.nome}">${ex.grupo}</option>`
+).join("");
 
 document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
 
@@ -96,7 +101,7 @@ function linhaExercicio(ex = {}) {
   const row = document.createElement("div");
   row.className = "exercicio-row";
   row.innerHTML = `
-    <label>Exercício<input type="text" data-field="nome" value="${escapeHtml(ex.nome || "")}" required></label>
+    <label>Exercício<input type="text" data-field="nome" list="catalogoExercicios" placeholder="Digite ou escolha da lista" value="${escapeHtml(ex.nome || "")}" required></label>
     <label>Séries<input type="number" min="1" data-field="series" value="${ex.series ?? 3}" required></label>
     <label>Repetições<input type="text" data-field="repeticoes" value="${escapeHtml(ex.repeticoes || "12")}" required></label>
     <label>Carga<input type="text" data-field="carga" value="${escapeHtml(ex.carga || "")}" placeholder="Ex: 20kg"></label>
@@ -105,6 +110,15 @@ function linhaExercicio(ex = {}) {
     <button type="button" class="remove-exercicio" title="Remover">✕</button>
   `;
   row.querySelector(".remove-exercicio").addEventListener("click", () => row.remove());
+
+  row.querySelector('[data-field="nome"]').addEventListener("change", (e) => {
+    const doCatalogo = buscarExercicioPorNome(e.target.value);
+    if (!doCatalogo) return;
+    row.querySelector('[data-field="series"]').value = doCatalogo.series;
+    row.querySelector('[data-field="repeticoes"]').value = doCatalogo.repeticoes;
+    row.querySelector('[data-field="descanso"]').value = doCatalogo.descanso;
+  });
+
   return row;
 }
 

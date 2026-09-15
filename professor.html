@@ -156,8 +156,11 @@
           <input type="hidden" name="treinoId">
           <label>Nome do treino<input type="text" name="nome" placeholder="Ex: Treino A - Superior" required></label>
 
+          <datalist id="catalogoExercicios"></datalist>
+
           <div id="exerciciosList"></div>
           <button type="button" class="btn btn--ghost" id="addExercicioBtn">+ Adicionar exercício</button>
+          <p class="form-hint">Digite o nome do exercício para ver sugestões da nossa biblioteca (séries/repetições/descanso preenchem sozinhos).</p>
 
           <div class="form-actions">
             <button type="button" class="btn btn--ghost" id="cancelarTreinoBtn">Cancelar</button>

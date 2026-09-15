@@ -14,7 +14,9 @@ avaliação física, execução com feedback obrigatório, evolução).
   registra avaliação física (peso, altura, IMC, medidas); controla
   mensalidades (com resumo de recebido no mês e cobrança rápida via
   WhatsApp) e check-in; acompanha o histórico de execuções/feedback de cada
-  aluno.
+  aluno. Na prescrição, o campo de exercício sugere nomes de uma **biblioteca
+  pré-cadastrada** (`js/exercicios-catalogo.js`) e preenche séries/repetições/
+  descanso automaticamente — mas continua aceitando texto livre.
 - **Aluno**: vê o treino atual, executa e **precisa dar feedback para
   concluir** (mesma lógica do MFIT: se tem feedback, o treino foi feito),
   acompanha histórico, gráfico de evolução de peso e faz seu próprio
@@ -82,6 +84,8 @@ de Cloud Functions/Admin SDK.
   pagamentos continuam sendo registrados manualmente pelo professor
 - Um único protocolo de avaliação física (peso/altura/IMC/medidas), em vez
   dos 11 protocolos de dobras cutâneas do MFIT
+- A biblioteca de exercícios é uma lista fixa no código (`js/exercicios-catalogo.js`),
+  não um cadastro editável pelo professor dentro do app
 - "Vencendo esta semana" e "aniversariantes do mês" no dashboard são
   calculados no navegador a partir do dia/data cadastrado — não há
   notificação push nem e-mail automático ainda
